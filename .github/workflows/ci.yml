@@ -40,9 +40,7 @@ jobs:
         gotestsum --format=standard-verbose \
           --junitfile=reports/unit-tests.xml \
           --jsonfile=reports/test-results.json \
-          --coverprofile=coverage.out \
-          --covermode=atomic \
-          ./...
+          -- ./... -coverprofile=coverage.out -covermode=atomic
 
     - name: Generate coverage report
       run: |
