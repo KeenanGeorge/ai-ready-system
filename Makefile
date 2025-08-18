@@ -1,4 +1,4 @@
-.PHONY: help test test-coverage test-verbose coverage clean build run
+.PHONY: help test test-coverage test-verbose coverage clean build run testmo-debug testmo-debug-win ci-test
 
 # Default target
 help:
@@ -10,6 +10,9 @@ help:
 	@echo "  clean         - Clean generated files"
 	@echo "  build         - Build the application"
 	@echo "  run           - Run the application"
+	@echo "  testmo-debug  - Debug Testmo CLI integration (Linux/Mac)"
+	@echo "  testmo-debug-win - Debug Testmo CLI integration (Windows)"
+	@echo "  ci-test       - Test CI workflow locally"
 
 # Run tests
 test:
@@ -66,3 +69,22 @@ lint:
 fmt:
 	go fmt ./...
 	go vet ./...
+
+# Debug Testmo CLI integration (Linux/Mac)
+testmo-debug:
+	@echo "🔍 Debugging Testmo CLI integration..."
+	@chmod +x scripts/testmo-debug.sh
+	@./scripts/testmo-debug.sh
+
+# Debug Testmo CLI integration (Windows)
+testmo-debug-win:
+	@echo "🔍 Debugging Testmo CLI integration (Windows)..."
+	@powershell -ExecutionPolicy Bypass -File scripts/testmo-debug.ps1
+
+# Test CI workflow locally
+ci-test: test-verbose
+	@echo "🧪 Testing CI workflow locally..."
+	@echo "✅ Tests completed successfully"
+	@echo "📊 Coverage report generated"
+	@echo "📁 Check reports/ directory for outputs"
+	@echo "🔍 Run 'make testmo-debug' or 'make testmo-debug-win' to debug Testmo integration"

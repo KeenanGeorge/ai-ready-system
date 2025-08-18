@@ -249,6 +249,22 @@ Monitor CI status via:
 3. **Linear linking issues**: Verify issue keys in PR titles/descriptions
 4. **Branch protection**: Ensure required checks are configured
 
+### Testmo CLI Issues
+
+If you encounter Testmo CLI errors like "unknown command 'run'", use the debug scripts:
+
+**Linux/Mac:**
+```bash
+make testmo-debug
+```
+
+**Windows:**
+```bash
+make testmo-debug-win
+```
+
+For detailed troubleshooting, see [TESTMO-FIX.md](TESTMO-FIX.md).
+
 ### Debug Commands
 
 ```bash
