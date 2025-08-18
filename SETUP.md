@@ -10,7 +10,7 @@ SMA-10 implements a comprehensive CI/CD pipeline that:
 - Integrates with Testmo for test result management
 - Automatically links Linear issues to GitHub PRs
 - Enforces coverage thresholds (80% minimum)
-- Provides automated PR comments with Testmo links..
+- Provides automated PR comments with Testmo links
 
 ## 📋 Prerequisites
 
