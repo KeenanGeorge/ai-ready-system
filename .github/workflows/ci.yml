@@ -63,7 +63,7 @@ jobs:
           --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
           --source "${{ env.TESTMO_SOURCE }}" \
           --milestone "CI Automation" \
-          --config "Go ${{ env.GO_VERSION }")
+          --config "Go ${{ env.GO_VERSION }}")
         echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
     - name: Submit test results to Testmo
