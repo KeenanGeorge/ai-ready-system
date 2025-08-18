@@ -14,7 +14,7 @@ This repo demonstrates a lightweight, AI-ready workflow:
 - Linear workspace (create a demo issue, e.g. `ENG-123`)
 - Testmo workspace with a project
 
-Create these **GitHub Actions secrets** in your repo (**Settings → Secrets and variables → Actions**):
+Create these **GitHub Actions secrets** in your repo (**Settings → Secrets and variables → Actions**)::
 
 - `TESTMO_TOKEN` — a Testmo API token
 - `TESTMO_INSTANCE` — e.g. `https://yourcompany.testmo.net`
