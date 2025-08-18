@@ -1,0 +1,8 @@
+# Build and dependency artifacts
+bin/
+build/
+dist/
+*.exe
+*.out
+coverage.out
+reports/
