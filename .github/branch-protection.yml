@@ -1,0 +1,38 @@
+# Branch Protection Rules for main branch
+# This file documents the required branch protection settings
+# Configure these in GitHub repository settings
+
+# Required Status Checks:
+# - ci (the CI workflow must pass)
+# - coverage (optional coverage threshold check)
+
+# Branch Protection Rules:
+# 1. Require status checks to pass before merging
+# 2. Require branches to be up to date before merging
+# 3. Require linear history
+# 4. Require signed commits (optional)
+# 5. Require PR reviews (optional)
+
+# GitHub Settings Path:
+# Settings > Branches > Add rule > Branch name pattern: main
+# 
+# Checkboxes to enable:
+# ✓ Require a pull request before merging
+# ✓ Require status checks to pass before merging
+# ✓ Require branches to be up to date before merging
+# ✓ Require linear history
+# ✓ Require signed commits (optional)
+# ✓ Require pull request reviews before merging (optional)
+# ✓ Require review from code owners (optional)
+# ✓ Restrict pushes that create files that match a specified pattern
+# ✓ Restrict pushes that delete files that match a specified pattern
+# ✓ Restrict pushes that modify files that match a specified pattern
+
+# Status Checks Required:
+# - ci (our CI workflow)
+# - coverage (coverage threshold check)
+
+# Additional Settings:
+# - Dismiss stale PR approvals when new commits are pushed
+# - Require conversation resolution before merging
+# - Require deployment to succeed before merging (if applicable)

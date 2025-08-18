@@ -1,0 +1,29 @@
+# Testmo Configuration
+# This file contains configuration for Testmo CLI operations
+
+# Testmo instance configuration
+instance: ${TESTMO_INSTANCE}
+token: ${TESTMO_TOKEN}
+project_id: ${TESTMO_PROJECT_ID}
+
+# Default run configuration
+run:
+  source: go-ci
+  milestone: CI Automation
+  config: Go 1.22
+
+# Test result patterns
+results:
+  - pattern: "reports/*.xml"
+    type: junit
+
+# Coverage configuration
+coverage:
+  - pattern: "reports/coverage.txt"
+    type: text
+
+# Metadata
+metadata:
+  environment: ci
+  framework: go
+  version: 1.22
