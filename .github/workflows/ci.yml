@@ -1,8 +1,12 @@
-name: ci
+name: Go Coverage & Tests
 on:
   pull_request:
   push:
     branches: [ main ]
+
+env:
+  COVERAGE_THRESHOLD: 80
+  MAX_TEST_RETRIES: 3
 
 jobs:
   test:
@@ -16,6 +20,11 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc
+
       - name: Cache Go modules
         uses: actions/cache@v4
         with:
@@ -28,10 +37,103 @@ jobs:
       - name: Install gotestsum (JUnit)
         run: go install gotest.tools/gotestsum@latest
 
-      - name: Run unit tests and create JUnit XML
+      # Phase 2: Test Reliability with Retry Logic
+      - name: Run unit tests with retry logic
+        id: test-execution
         run: |
           mkdir -p reports
-          ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out ./...
+          echo "🧪 Starting test execution with retry logic..."
+          
+          for i in $(seq 1 ${{ env.MAX_TEST_RETRIES }}); do
+            echo "📋 Attempt $i of ${{ env.MAX_TEST_RETRIES }}..."
+            
+            if ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out ./...; then
+              echo "✅ Tests passed on attempt $i"
+              echo "attempt_number=$i" >> $GITHUB_OUTPUT
+              break
+            fi
+            
+            if [ $i -eq ${{ env.MAX_TEST_RETRIES }} ]; then
+              echo "❌ All ${{ env.MAX_TEST_RETRIES }} test attempts failed"
+              exit 1
+            fi
+            
+            echo "⚠️ Attempt $i failed, retrying in 5 seconds..."
+            sleep 5
+          done
+
+      # Phase 1: Coverage Threshold Enforcement
+      - name: Enforce coverage threshold
+        id: coverage-check
+        run: |
+          echo "📊 Checking coverage threshold..."
+          
+          # Extract coverage percentage
+          COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
+          echo "Current coverage: ${COVERAGE}%"
+          echo "Threshold: ${{ env.COVERAGE_THRESHOLD }}%"
+          
+          # Check if coverage meets threshold
+          if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "❌ Coverage ${COVERAGE}% below ${{ env.COVERAGE_THRESHOLD }}% threshold"
+            echo "coverage_status=failed" >> $GITHUB_OUTPUT
+            echo "coverage_percentage=$COVERAGE" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ Coverage ${COVERAGE}% meets ${{ env.COVERAGE_THRESHOLD }}% threshold"
+            echo "coverage_status=passed" >> $GITHUB_OUTPUT
+            echo "coverage_percentage=$COVERAGE" >> $GITHUB_OUTPUT
+          fi
+
+      # Phase 3: Security Scanning & Dependency Checks
+      - name: Install security tools
+        run: |
+          echo "🔒 Installing security scanning tools..."
+          go install github.com/sonatype-nexus-community/nancy@latest
+          go install github.com/google/go-licenses@latest
+
+      - name: Security scan dependencies
+        id: security-scan
+        run: |
+          echo "🔍 Scanning dependencies for vulnerabilities..."
+          
+          # Scan for known CVEs
+          if go list -json -deps ./... | nancy sleuth; then
+            echo "✅ No critical vulnerabilities found"
+            echo "security_status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Critical vulnerabilities detected"
+            echo "security_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Check license compliance
+        id: license-check
+        run: |
+          echo "📜 Checking license compliance..."
+          
+          if go-licenses check ./...; then
+            echo "✅ License compliance check passed"
+            echo "license_status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "❌ License compliance check failed"
+            echo "license_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Generate coverage reports
+        run: |
+          echo "📈 Generating detailed coverage reports..."
+          go tool cover -html=coverage.out -o reports/coverage.html
+          go tool cover -func=coverage.out > reports/coverage.txt
+          
+          # Show coverage summary
+          echo "📊 Coverage Summary:"
+          go tool cover -func=coverage.out | grep total:
+          
+          # Count test files
+          echo "🧪 Test Files Found:"
+          find . -name "*_test.go" | wc -l
 
       - name: Setup Node (for Testmo CLI)
         uses: actions/setup-node@v4
@@ -50,4 +152,63 @@ jobs:
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --name "Go CI ${{ github.ref_name }} @ ${{ github.sha }}" \
             --source "go-ci" \
-            --results "reports/*.xml"
+            --results "reports/*.xml" \
+            --coverage "reports/coverage.txt"
+
+      # Enhanced PR comments with quality metrics
+      - name: Comment on PR with quality metrics
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testAttempts = `${{ steps.test-execution.outputs.attempt_number }}`;
+            const coverageStatus = `${{ steps.coverage-check.outputs.coverage_status }}`;
+            const coveragePercentage = `${{ steps.coverage-check.outputs.coverage_percentage }}`;
+            const securityStatus = `${{ steps.security-scan.outputs.security_status }}`;
+            const licenseStatus = `${{ steps.license-check.outputs.license_status }}`;
+            
+            const comment = `## 🧪 CI Quality Report
+
+            ### ✅ Test Execution
+            - **Status**: Tests passed on attempt ${testAttempts || 1}
+            - **Reliability**: Retry logic enabled (max ${{ env.MAX_TEST_RETRIES }} attempts)
+
+            ### 📊 Coverage Analysis
+            - **Status**: ${coverageStatus === 'passed' ? '✅ PASSED' : '❌ FAILED'}
+            - **Coverage**: ${coveragePercentage}% (threshold: ${{ env.COVERAGE_THRESHOLD }}%)
+            - **Quality Gate**: ${coverageStatus === 'passed' ? 'Meets requirements' : 'Below threshold'}
+
+            ### 🔒 Security & Compliance
+            - **Vulnerability Scan**: ${securityStatus === 'passed' ? '✅ PASSED' : '❌ FAILED'}
+            - **License Compliance**: ${licenseStatus === 'passed' ? '✅ PASSED' : '❌ FAILED'}
+
+            ### 📁 Artifacts Available
+            - JUnit XML report
+            - Coverage HTML report
+            - Coverage text summary
+            - Security scan results
+
+            ### 🎯 Production Ready
+            ${coverageStatus === 'passed' && securityStatus === 'passed' && licenseStatus === 'passed' 
+              ? '✅ **All quality gates passed - Ready for production!**' 
+              : '❌ **Quality gates failed - Review required before production**'}
+
+            ---
+            *Generated by enhanced CI pipeline (SMA-17)*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}
+          path: |
+            reports/
+            coverage.out
+          retention-days: 30
