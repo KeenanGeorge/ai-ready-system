@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 env:
-  COVERAGE_THRESHOLD: 50  # Start with realistic threshold, increase gradually
+  COVERAGE_THRESHOLD: 60  # Temporarily set to 60% to match current coverage
   MAX_TEST_RETRIES: 3
 
 jobs:
@@ -81,19 +81,36 @@ jobs:
           if [ -z "$COVERAGE" ] || [ "$COVERAGE" = "0" ]; then
             echo "⚠️ Method 1 failed, trying Method 2: Manual coverage calculation..."
             
-            # Count total lines and covered lines from coverage.out
+            # Parse coverage manually from the file
             TOTAL_LINES=$(wc -l < coverage.out)
             if [ $TOTAL_LINES -gt 1 ]; then
-              # Skip the first line (mode: set)
+              # Skip the first line (mode: atomic)
               COVERED_LINES=$(tail -n +2 coverage.out | awk -F' ' '{sum += $4} END {print sum}')
               TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk -F' ' '{sum += $3} END {print sum}')
+              
+              echo "Debug: Covered lines = $COVERED_LINES, Total code lines = $TOTAL_CODE_LINES"
               
               if [ -n "$COVERED_LINES" ] && [ -n "$TOTAL_CODE_LINES" ] && [ "$TOTAL_CODE_LINES" -gt 0 ]; then
                 COVERAGE=$(echo "scale=1; $COVERED_LINES * 100 / $TOTAL_CODE_LINES" | bc)
                 echo "📊 Manual calculation: $COVERED_LINES covered out of $TOTAL_CODE_LINES lines = $COVERAGE%"
               else
-                echo "⚠️ Manual calculation failed, using fallback..."
-                COVERAGE=25  # Conservative estimate
+                echo "⚠️ Manual calculation failed, trying Method 3: Direct parsing..."
+                
+                # Method 3: Direct parsing of the specific format
+                # Format: example.com/go-linear-testmo-demo/main.go:8.60,10.2 1 8
+                # Extract the last two numbers: covered lines and total lines
+                COVERED_LINES=$(tail -n +2 coverage.out | awk '{print $4}' | paste -sd+ | bc)
+                TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk '{print $3}' | paste -sd+ | bc)
+                
+                echo "Debug Method 3: Covered lines = $COVERED_LINES, Total code lines = $TOTAL_CODE_LINES"
+                
+                if [ -n "$COVERED_LINES" ] && [ -n "$TOTAL_CODE_LINES" ] && [ "$TOTAL_CODE_LINES" -gt 0 ]; then
+                  COVERAGE=$(echo "scale=1; $COVERED_LINES * 100 / $TOTAL_CODE_LINES" | bc)
+                  echo "📊 Method 3 calculation: $COVERED_LINES covered out of $TOTAL_CODE_LINES lines = $COVERAGE%"
+                else
+                  echo "⚠️ All methods failed, using fallback..."
+                  COVERAGE=25  # Conservative estimate
+                fi
               fi
             else
               echo "⚠️ Coverage file too small, using fallback..."
