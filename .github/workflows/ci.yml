@@ -5,9 +5,7 @@ on:
     branches: [ main ]
 
 env:
-
   COVERAGE_THRESHOLD: 50  # Start with realistic threshold, increase gradually
-
   MAX_TEST_RETRIES: 3
 
 jobs:
@@ -29,6 +27,7 @@ jobs:
 
       - name: Cache Go modules
         uses: actions/cache@v4
+        continue-on-error: true
         with:
           path: |
             ~/.cache/go-build
@@ -39,11 +38,7 @@ jobs:
       - name: Install gotestsum (JUnit)
         run: go install gotest.tools/gotestsum@latest
 
-
       # Enhanced test execution with retry logic
-
-      # Phase 2: Test Reliability with Retry Logic
-
       - name: Run unit tests with retry logic
         id: test-execution
         run: |
@@ -53,11 +48,7 @@ jobs:
           for i in $(seq 1 ${{ env.MAX_TEST_RETRIES }}); do
             echo "📋 Attempt $i of ${{ env.MAX_TEST_RETRIES }}..."
             
-
             if ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out -covermode=atomic ./...; then
-
-            if ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out ./...; then
-
               echo "✅ Tests passed on attempt $i"
               echo "attempt_number=$i" >> $GITHUB_OUTPUT
               break
@@ -72,17 +63,12 @@ jobs:
             sleep 5
           done
 
-
       # Fixed coverage threshold enforcement with robust parsing
-
-      # Phase 1: Coverage Threshold Enforcement
-
       - name: Enforce coverage threshold
         id: coverage-check
         run: |
           echo "📊 Checking coverage threshold..."
           
-
           # Debug: Show coverage file contents
           echo "Coverage file contents:"
           cat coverage.out
@@ -117,10 +103,6 @@ jobs:
           
           echo "📊 Final coverage result: ${COVERAGE}%"
           echo "🎯 Threshold: ${{ env.COVERAGE_THRESHOLD }}%"
-          # Extract coverage percentage
-          COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
-          echo "Current coverage: ${COVERAGE}%"
-          echo "Threshold: ${{ env.COVERAGE_THRESHOLD }}%"
           
           # Check if coverage meets threshold
           if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
@@ -161,7 +143,6 @@ jobs:
           echo "Total test files: $(find . -name "*_test.go" | wc -l)"
 
       # Security scanning
-
       - name: Install security tools
         run: |
           echo "🔒 Installing security scanning tools..."
@@ -196,20 +177,6 @@ jobs:
             echo "license_status=failed" >> $GITHUB_OUTPUT
             exit 1
           fi
-
-      - name: Generate coverage reports
-        run: |
-          echo "📈 Generating detailed coverage reports..."
-          go tool cover -html=coverage.out -o reports/coverage.html
-          go tool cover -func=coverage.out > reports/coverage.txt
-          
-          # Show coverage summary
-          echo "📊 Coverage Summary:"
-          go tool cover -func=coverage.out | grep total:
-          
-          # Count test files
-          echo "🧪 Test Files Found:"
-          find . -name "*_test.go" | wc -l
 
       - name: Setup Node (for Testmo CLI)
         uses: actions/setup-node@v4
