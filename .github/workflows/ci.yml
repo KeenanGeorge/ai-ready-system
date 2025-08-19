@@ -1,197 +1,53 @@
-name: CI
-
+name: ci
 on:
-  push:
-    branches: [ main, "features/**" ]   # adjust to your branch naming
   pull_request:
+  push:
     branches: [ main ]
-
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
-env:
-  GO_VERSION: '1.22'
-  TESTMO_SOURCE: 'go-ci'
-  # Set these in repo secrets:
-  TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
-  TESTMO_INSTANCE: ${{ secrets.TESTMO_INSTANCE }}       # e.g. https://yourcompany.testmo.net
-  TESTMO_PROJECT_ID: ${{ secrets.TESTMO_PROJECT_ID }}   # e.g. 1
 
 jobs:
   test:
-    name: Run Tests and Upload to Testmo
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
+          go-version: '1.22'
 
-      - name: Ensure $GOPATH/bin on PATH
-        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
 
-      - name: Install gotestsum
+      - name: Install gotestsum (JUnit)
         run: go install gotest.tools/gotestsum@latest
 
+      - name: Run unit tests and create JUnit XML
+        run: |
+          mkdir -p reports
+          ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out ./...
+
+      - name: Setup Node (for Testmo CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
       - name: Install Testmo CLI
-        run: npm install -g @testmo/testmo-cli
+        run: npm i -g @testmo/testmo-cli
 
-      - name: Create reports directory
-        run: mkdir -p reports
-
-      - name: Run tests with coverage and generate JUnit report
-        run: |
-          gotestsum --format=standard-verbose \
-            --junitfile=reports/unit-tests.xml \
-            --jsonfile=reports/test-results.json \
-            -- ./... -coverprofile=coverage.out -covermode=atomic
-
-      - name: Generate coverage report
-        run: |
-          go tool cover -html=coverage.out -o reports/coverage.html
-          go tool cover -func=coverage.out > reports/coverage.txt
-
-      - name: Get commit info
-        id: commit
-        run: |
-          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-          echo "branch=${{ github.head_ref || github.ref_name }}" >> $GITHUB_OUTPUT
-          msg="$(git log -1 --pretty=format:%s | tr '\n' ' ' | sed 's/%/%25/g')"
-          echo "message=$msg" >> $GITHUB_OUTPUT
-
-      # --- Testmo: create / submit / complete using colon commands ---
-      - name: Create Testmo run
-        id: testmo
+      - name: Submit results to Testmo
         env:
-          TESTMO_TOKEN: ${{ env.TESTMO_TOKEN }}
-          TESTMO_INSTANCE: ${{ env.TESTMO_INSTANCE }}
-          TESTMO_PROJECT_ID: ${{ env.TESTMO_PROJECT_ID }}
-        run: |
-          set +e
-          RUN_JSON="$(testmo automation:run:create \
-            --instance "${TESTMO_INSTANCE}" \
-            --project-id "${TESTMO_PROJECT_ID}" \
-            --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
-            --source "${TESTMO_SOURCE}" \
-            --milestone "CI Automation" \
-            --config "Go ${GO_VERSION}" \
-            --json 2>/dev/null)"
-          PYTHON=$(command -v python3 || command -v python)
-          if [ -n "$RUN_JSON" ] && [ -n "$PYTHON" ]; then
-            RUN_ID="$($PYTHON - <<'PY'
-import sys, json
-data=json.loads(sys.stdin.read() or '{}')
-print(data.get('id',''))
-PY
-<<< "$RUN_JSON")"
-          fi
-          if [ -z "${RUN_ID:-}" ]; then
-            echo "Failed to create Testmo run"
-            echo "run_id=failed" >> $GITHUB_OUTPUT
-          else
-            echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-            echo "Successfully created Testmo run: $RUN_ID"
-          fi
-
-      - name: Submit test results to Testmo
-        if: steps.testmo.outputs.run_id != 'failed'
-        env:
-          TESTMO_TOKEN: ${{ env.TESTMO_TOKEN }}
-          TESTMO_INSTANCE: ${{ env.TESTMO_INSTANCE }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
           testmo automation:run:submit \
-            --instance "${TESTMO_INSTANCE}" \
-            --run-id "${{ steps.testmo.outputs.run_id }}" \
-            --results reports/unit-tests.xml \
-            --coverage reports/coverage.txt
-          echo "Successfully submitted test results to Testmo"
-
-      - name: Complete Testmo run
-        if: steps.testmo.outputs.run_id != 'failed'
-        env:
-          TESTMO_TOKEN: ${{ env.TESTMO_TOKEN }}
-          TESTMO_INSTANCE: ${{ env.TESTMO_INSTANCE }}
-        run: |
-          testmo automation:run:complete \
-            --instance "${TESTMO_INSTANCE}" \
-            --run-id "${{ steps.testmo.outputs.run_id }}"
-          echo "Successfully completed Testmo run"
-
-      - name: Comment on PR with Testmo link
-        if: github.event_name == 'pull_request' && steps.testmo.outputs.run_id != 'failed'
-        uses: actions/github-script@v7
-        env:
-          TESTMO_INSTANCE: ${{ env.TESTMO_INSTANCE }}
-        with:
-          script: |
-            const runId = `${{ steps.testmo.outputs.run_id }}`;
-            const base = process.env.TESTMO_INSTANCE.replace(/\/+$/,'');
-            const url = `${base}/automation/runs/${runId}`;
-            const comment = `## 🧪 Test Results Uploaded to Testmo
-
-            ✅ **CI Status**: Tests ran
-
-            📊 **Testmo Run**: [View Results](${url})
-
-            📈 **Coverage**: Generated and uploaded
-
-            🔗 **Run ID**: \`${runId}\`
-
-            ---
-            *This comment was automatically generated by the CI pipeline*`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
-      - name: Comment on PR with Testmo failure
-        if: always() && github.event_name == 'pull_request' && steps.testmo.outputs.run_id == 'failed'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const comment = `## ⚠️ Testmo Integration Failed
-
-            ❌ **CI Status**: Tests ran but Testmo integration failed
-
-            🔧 **Issue**: Unable to create Testmo automation run
-
-            📋 **Next Steps**:
-            - Verify \`TESTMO_INSTANCE\`, \`TESTMO_PROJECT_ID\`, and \`TESTMO_TOKEN\` secrets
-            - Ensure the CLI uses colon commands (e.g., \`automation:run:create\`)
-            - Check network access to your Testmo instance
-
-            ---
-            *This comment was automatically generated by the CI pipeline*`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            reports/
-            coverage.out
-          retention-days: 30
-
-      - name: Check test coverage threshold (>=80%)
-        run: |
-          pct=$(awk '/^total:/ { gsub("%","",$3); print $3 }' reports/coverage.txt)
-          echo "Total coverage: ${pct}%"
-          awk -v p="$pct" 'BEGIN{ if (p+0 < 80) { print "Coverage below 80% threshold: " p "%"; exit 1 } else { print "Coverage threshold met: " p "%" } }'
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+            --name "Go CI ${{ github.ref_name }} @ ${{ github.sha }}" \
+            --source "go-ci" \
+            --results "reports/*.xml"
