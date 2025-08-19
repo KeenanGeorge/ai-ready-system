@@ -1,4 +1,4 @@
-name: ci
+name: Go Coverage & Tests
 on:
   pull_request:
   push:
