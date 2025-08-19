@@ -7,7 +7,7 @@ import (
 )
 
 func TestHealthEndpoint(t *testing.T) {
-	t.Run("SMA-7: Health endpoint returns ok status", func(t *testing.T) {
+	t.Run("SMA-7:: Health endpoint returns ok status", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/health", nil)
 		rr := httptest.NewRecorder()
 		healthHandler(rr, req)
