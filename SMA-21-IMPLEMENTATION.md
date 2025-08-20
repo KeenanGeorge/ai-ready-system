@@ -71,7 +71,8 @@
   run: |
     testmo automation:run:complete \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
-      --project-id ${{ secrets.TESTMO_PROJECT_ID }}
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+      --run-id "${{ steps.testmo.outputs.run_id }}"
 ```
 
 ### **Additional Fixes Applied:**
@@ -79,7 +80,8 @@
 - ✅ **Removed `--milestone "CI Automation"`** parameter that was causing "milestone not found" errors
 - ✅ **Added `--name` parameter** to submit command to fix "required option '--name <name>' not specified" error
 - ✅ **Added `--source` parameter** to submit command to fix "required option '--source <source>' not specified" error
-- ✅ **Removed `--run-id` parameter** from submit and complete commands as it's not supported
+- ✅ **Removed `--run-id` parameter** from submit command as it's not supported there
+- ✅ **Restored `--run-id` parameter** to complete command as it's required there
 - ✅ **Removed `--coverage` parameter** from submit command as it's not supported
 - ✅ **Simplified command structure** to use only supported parameters
 - ✅ **Maintained essential metadata** (name, source) for proper Testmo integration

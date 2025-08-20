@@ -240,7 +240,8 @@ jobs:
         run: |
           testmo automation:run:complete \
             --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }}
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+            --run-id "${{ steps.testmo.outputs.run_id }}"
 
       # Enhanced PR comments with quality metrics
       - name: Comment on PR with quality metrics
