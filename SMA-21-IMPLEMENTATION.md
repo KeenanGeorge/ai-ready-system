@@ -61,7 +61,6 @@
     testmo automation:run:submit \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-      --run-id "${{ steps.testmo.outputs.run_id }}" \
       --name "Test Results: ${{ steps.commit.outputs.branch }}" \
       --source "go-ci" \
       --results reports/unit-tests.xml \
@@ -73,8 +72,7 @@
   run: |
     testmo automation:run:complete \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
-      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-      --run-id "${{ steps.testmo.outputs.run_id }}"
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }}
 ```
 
 ### **Additional Fixes Applied:**
@@ -82,7 +80,8 @@
 - ✅ **Removed `--milestone "CI Automation"`** parameter that was causing "milestone not found" errors
 - ✅ **Added `--name` parameter** to submit command to fix "required option '--name <name>' not specified" error
 - ✅ **Added `--source` parameter** to submit command to fix "required option '--source <source>' not specified" error
-- ✅ **Simplified command structure** to use only required parameters
+- ✅ **Removed `--run-id` parameter** from submit and complete commands as it's not supported
+- ✅ **Simplified command structure** to use only supported parameters
 - ✅ **Maintained essential metadata** (name, source) for proper Testmo integration
 
 ## What Was Preserved (User's Previous Changes)

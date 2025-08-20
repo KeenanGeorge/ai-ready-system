@@ -230,7 +230,6 @@ jobs:
           testmo automation:run:submit \
             --instance ${{ secrets.TESTMO_INSTANCE }} \
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-            --run-id "${{ steps.testmo.outputs.run_id }}" \
             --name "Test Results: ${{ steps.commit.outputs.branch }}" \
             --source "go-ci" \
             --results reports/unit-tests.xml \
@@ -242,8 +241,7 @@ jobs:
         run: |
           testmo automation:run:complete \
             --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-            --run-id "${{ steps.testmo.outputs.run_id }}"
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }}
 
       # Enhanced PR comments with quality metrics
       - name: Comment on PR with quality metrics
