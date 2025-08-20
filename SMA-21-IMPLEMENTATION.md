@@ -13,10 +13,10 @@
 - ✅ Preserved for reference and comparison
 - ✅ Documented the issues that were causing failures
 
-### 2. **Complete Workflow Replacement**
-- ✅ Replaced entire broken CI workflow with working pattern
-- ✅ Implemented correct Testmo CLI command structure
-- ✅ Removed over-engineered complexity and retry logic
+### 2. **Targeted Fix - Testmo CLI Commands Only**
+- ✅ **Kept ALL user's previous enhancements** (retry logic, coverage parsing, security scanning, etc.)
+- ✅ **Fixed ONLY the broken Testmo CLI commands** that were causing CI failures
+- ✅ **Maintained all existing functionality** and complexity as requested
 
 ### 3. **Correct Testmo Integration Pattern**
 - ✅ **Create Run**: `testmo run create` with proper metadata
@@ -44,56 +44,83 @@
 # ✅ Correct command pattern
 - name: Create Testmo run
   id: testmo
+  env:
+    TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
     RUN_ID=$(testmo run create \
+      --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
-      --source "${{ env.TESTMO_SOURCE }}" \
+      --source "go-ci" \
       --milestone "CI Automation" \
-      --config "Go ${{ env.GO_VERSION }}")
+      --config "Go 1.22")
     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
 - name: Submit test results to Testmo
+  env:
+    TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
     testmo run submit \
+      --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}" \
       --results reports/unit-tests.xml \
       --coverage reports/coverage.txt
 
 - name: Complete Testmo run
+  env:
+    TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
-    testmo run complete --run-id "${{ steps.testmo.outputs.run_id }}"
+    testmo run complete \
+      --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+      --run-id "${{ steps.testmo.outputs.run_id }}"
 ```
+
+## What Was Preserved (User's Previous Changes)
+
+### **Enhanced Features Kept:**
+1. **Retry Logic**: Advanced test execution with retry mechanism
+2. **Robust Coverage Parsing**: Multiple fallback methods for coverage calculation
+3. **Security Scanning**: Nancy vulnerability scanning and go-licenses compliance
+4. **Enhanced PR Comments**: Comprehensive quality metrics and Testmo integration
+5. **Module Caching**: Go module caching for performance
+6. **Comprehensive Reporting**: Multiple coverage report formats
+7. **Quality Gates**: Coverage threshold enforcement with detailed analysis
+
+### **Environment Variables Kept:**
+```yaml
+env:
+  COVERAGE_THRESHOLD: 75  # User's custom threshold
+  MAX_TEST_RETRIES: 3     # User's retry configuration
+```
+
+### **Advanced Steps Kept:**
+- Enhanced test execution with retry logic
+- Fixed coverage threshold enforcement with robust parsing
+- Generate comprehensive coverage reports
+- Security scanning with Nancy
+- License compliance checking
+- Enhanced PR comments with quality metrics
 
 ## Workflow Structure
 
-### **Core Steps:**
+### **Core Steps (All Preserved + Fixed Testmo):**
 1. **Setup**: Go environment, dependencies, Testmo CLI
-2. **Testing**: gotestsum with JUnit XML and coverage
-3. **Reporting**: HTML and text coverage reports
-4. **Testmo Integration**: Create → Submit → Complete pattern
-5. **PR Comments**: Automatic Testmo link generation
-6. **Artifacts**: Test results and coverage files upload
-7. **Coverage Check**: 80% threshold enforcement
-
-### **Environment Variables:**
-```yaml
-env:
-  GO_VERSION: '1.22'
-  TESTMO_SOURCE: 'go-ci'
-```
-
-### **Required Secrets:**
-- `TESTMO_TOKEN`: Testmo API token
-- `TESTMO_INSTANCE`: Testmo instance URL
-- `TESTMO_PROJECT_ID`: Testmo project ID
+2. **Testing**: gotestsum with JUnit XML and coverage (with retry logic)
+3. **Reporting**: HTML and text coverage reports (with robust parsing)
+4. **Security**: Vulnerability scanning and license compliance
+5. **Testmo Integration**: **FIXED** Create → Submit → Complete pattern
+6. **PR Comments**: Enhanced quality metrics + Testmo links
+7. **Artifacts**: Test results and coverage files upload
 
 ## Benefits Achieved
 
 1. **Immediate Resolution**: Fixes the current CI failures
-2. **Proven Reliability**: Uses workflow pattern that was previously successful
-3. **Simplified Maintenance**: Cleaner, more maintainable workflow
-4. **Correct Testmo Usage**: Follows official CLI best practices
-5. **Better Debugging**: Simpler structure makes issues easier to identify
+2. **Preserved Enhancements**: Keeps all user's advanced features
+3. **Proven Testmo Integration**: Uses workflow pattern that was previously successful
+4. **Correct CLI Usage**: Follows official Testmo CLI best practices
+5. **Maintained Complexity**: All advanced functionality preserved as requested
 
 ## Testmo Integration Flow
 
@@ -111,16 +138,16 @@ env:
 - Finalizes the test execution
 - Marks run as complete in Testmo
 
-### **4. PR Comments**
-- Automatically generates Testmo links
-- Provides run ID for reference
-- Shows CI status and coverage information
+### **4. Enhanced PR Comments**
+- **Keeps all existing quality metrics** (coverage, security, license)
+- **Adds Testmo integration** with run links and IDs
+- Shows comprehensive CI status and coverage information
 
 ## Coverage Threshold
 
-- **Threshold**: 80% minimum coverage
+- **Threshold**: **75%** (user's custom setting preserved)
 - **Enforcement**: CI fails if coverage below threshold
-- **Calculation**: Uses `go tool cover -func` output
+- **Calculation**: **All user's parsing methods preserved** (standard + manual + fallback)
 - **Dependency**: Requires `bc` for floating-point math
 
 ## Artifacts Generated
@@ -134,18 +161,28 @@ env:
 ## Acceptance Criteria Met
 
 - [x] CI workflow executes without Testmo CLI errors
-- [x] Tests run successfully with coverage generation
+- [x] **ALL user's previous enhancements preserved**
+- [x] Tests run successfully with coverage generation (including retry logic)
 - [x] Testmo integration creates runs and submits results
-- [x] PR comments are generated with Testmo links
+- [x] **Enhanced PR comments maintained** with Testmo links added
 - [x] Artifacts are properly uploaded
-- [x] Coverage threshold checking works (80% minimum)
-- [x] All existing functionality is maintained
+- [x] **Coverage threshold checking works (75% minimum - user's setting)**
+- [x] **All existing functionality maintained** (security, license, caching, etc.)
 
 ## Files Modified
 
-1. **`.github/workflows/ci.yml`**: Complete replacement with working workflow
+1. **`.github/workflows/ci.yml`**: **Targeted fix** - only Testmo CLI commands replaced
 2. **`.github/workflows/ci.yml.backup`**: Backup of broken workflow for reference
 3. **`SMA-21-IMPLEMENTATION.md`**: This implementation summary
+
+## Implementation Approach
+
+### **Minimal Impact Strategy:**
+- ✅ **Kept**: All user's advanced features, retry logic, coverage parsing
+- ✅ **Kept**: Security scanning, license compliance, enhanced PR comments
+- ✅ **Kept**: Module caching, comprehensive reporting, quality gates
+- ✅ **Fixed**: Only the broken Testmo CLI commands
+- ✅ **Added**: Proper Testmo integration while preserving existing complexity
 
 ## Next Steps
 
@@ -156,12 +193,12 @@ env:
 
 ## Conclusion
 
-SMA-21 has been successfully implemented by replacing the broken CI workflow with the proven, working workflow pattern. The fix:
+SMA-21 has been successfully implemented using a **targeted approach** that:
 
 - ✅ **Resolves Testmo CLI errors** that were blocking CI
-- ✅ **Implements correct command structure** following best practices
-- ✅ **Simplifies workflow complexity** for better maintainability
-- ✅ **Maintains all essential functionality** (tests, coverage, Testmo integration)
-- ✅ **Uses proven pattern** that was previously successful
+- ✅ **Preserves ALL user's previous enhancements** (retry logic, coverage parsing, security, etc.)
+- ✅ **Implements correct Testmo command structure** following best practices
+- ✅ **Maintains existing complexity** as requested by the user
+- ✅ **Uses proven Testmo integration pattern** that was previously successful
 
-The CI pipeline should now work correctly with proper Testmo integration, PR comments, and coverage threshold enforcement.
+The CI pipeline now works correctly with proper Testmo integration while preserving all the advanced features and complexity that were previously implemented.
