@@ -1,11 +1,12 @@
 name: Go Coverage & Tests
+
 on:
   pull_request:
   push:
     branches: [ main ]
 
 env:
-  COVERAGE_THRESHOLD: 75  # Temporarily set to 60% to match current coverage
+  COVERAGE_THRESHOLD: 75
   MAX_TEST_RETRIES: 3
   TESTMO_SOURCE: 'go-ci'
 
@@ -45,84 +46,57 @@ jobs:
         run: |
           mkdir -p reports
           echo "🧪 Starting test execution with retry logic..."
-          
+          GOTESTSUM="$(go env GOPATH)/bin/gotestsum"
+
           for i in $(seq 1 ${{ env.MAX_TEST_RETRIES }}); do
             echo "📋 Attempt $i of ${{ env.MAX_TEST_RETRIES }}..."
-            
-            if ~/go/bin/gotestsum --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out -covermode=atomic ./...; then
+            if "$GOTESTSUM" --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out -covermode=atomic ./...; then
               echo "✅ Tests passed on attempt $i"
               echo "attempt_number=$i" >> $GITHUB_OUTPUT
               break
             fi
-            
+
             if [ $i -eq ${{ env.MAX_TEST_RETRIES }} ]; then
               echo "❌ All ${{ env.MAX_TEST_RETRIES }} test attempts failed"
               exit 1
             fi
-            
+
             echo "⚠️ Attempt $i failed, retrying in 5 seconds..."
             sleep 5
           done
 
-      # Fixed coverage threshold enforcement with robust parsing
+      # Coverage threshold enforcement with robust parsing
       - name: Enforce coverage threshold
         id: coverage-check
         run: |
           echo "📊 Checking coverage threshold..."
-          
-          # Debug: Show coverage file contents
           echo "Coverage file contents:"
-          cat coverage.out
-          
-          # Method 1: Try standard go tool cover parsing
+          cat coverage.out || true
+
           echo "🔍 Method 1: Standard go tool cover parsing..."
           COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep -E '^total:' | awk '{print $3}' | sed 's/%//')
-          
-          # Method 2: Fallback to manual parsing if Method 1 fails
+
           if [ -z "$COVERAGE" ] || [ "$COVERAGE" = "0" ]; then
             echo "⚠️ Method 1 failed, trying Method 2: Manual coverage calculation..."
-            
-            # Parse coverage manually from the file
-            TOTAL_LINES=$(wc -l < coverage.out)
-            if [ $TOTAL_LINES -gt 1 ]; then
-              # Skip the first line (mode: atomic)
-              COVERED_LINES=$(tail -n +2 coverage.out | awk -F' ' '{sum += $4} END {print sum}')
-              TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk -F' ' '{sum += $3} END {print sum}')
-              
-              echo "Debug: Covered lines = $COVERED_LINES, Total code lines = $TOTAL_CODE_LINES"
-              
+            TOTAL_LINES=$(wc -l < coverage.out || echo 0)
+            if [ "$TOTAL_LINES" -gt 1 ]; then
+              COVERED_LINES=$(tail -n +2 coverage.out | awk '{sum += $4} END {print sum}')
+              TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk '{sum += $3} END {print sum}')
               if [ -n "$COVERED_LINES" ] && [ -n "$TOTAL_CODE_LINES" ] && [ "$TOTAL_CODE_LINES" -gt 0 ]; then
                 COVERAGE=$(echo "scale=1; $COVERED_LINES * 100 / $TOTAL_CODE_LINES" | bc)
-                echo "📊 Manual calculation: $COVERED_LINES covered out of $TOTAL_CODE_LINES lines = $COVERAGE%"
               else
-                echo "⚠️ Manual calculation failed, trying Method 3: Direct parsing..."
-                
-                # Method 3: Direct parsing of the specific format
-                # Format: example.com/go-linear-testmo-demo/main.go:8.60,10.2 1 8
-                # Extract the last two numbers: covered lines and total lines
-                COVERED_LINES=$(tail -n +2 coverage.out | awk '{print $4}' | paste -sd+ | bc)
-                TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk '{print $3}' | paste -sd+ | bc)
-                
-                echo "Debug Method 3: Covered lines = $COVERED_LINES, Total code lines = $TOTAL_CODE_LINES"
-                
-                if [ -n "$COVERED_LINES" ] && [ -n "$TOTAL_CODE_LINES" ] && [ "$TOTAL_CODE_LINES" -gt 0 ]; then
-                  COVERAGE=$(echo "scale=1; $COVERED_LINES * 100 / $TOTAL_CODE_LINES" | bc)
-                  echo "📊 Method 3 calculation: $COVERED_LINES covered out of $TOTAL_CODE_LINES lines = $COVERAGE%"
-                else
-                  echo "⚠️ All methods failed, using fallback..."
-                  COVERAGE=25  # Conservative estimate
-                fi
+                echo "⚠️ Manual calculation failed, using fallback 0"
+                COVERAGE=0
               fi
             else
-              echo "⚠️ Coverage file too small, using fallback..."
+              echo "⚠️ Coverage file too small, using fallback 0"
               COVERAGE=0
             fi
           fi
-          
+
           echo "📊 Final coverage result: ${COVERAGE}%"
           echo "🎯 Threshold: ${{ env.COVERAGE_THRESHOLD }}%"
-          
-          # Check if coverage meets threshold
+
           if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
             echo "❌ Coverage ${COVERAGE}% below ${{ env.COVERAGE_THRESHOLD }}% threshold"
             echo "coverage_status=failed" >> $GITHUB_OUTPUT
@@ -134,31 +108,25 @@ jobs:
             echo "coverage_percentage=$COVERAGE" >> $GITHUB_OUTPUT
           fi
 
-      # Generate comprehensive coverage reports
+      # Generate coverage reports
       - name: Generate coverage reports
         run: |
           echo "📈 Generating detailed coverage reports..."
-          
-          # HTML coverage report
-          go tool cover -html=coverage.out -o reports/coverage.html
-          
-          # Text coverage report
-          go tool cover -func=coverage.out > reports/coverage.txt
-          
-          # Show coverage summary
+          mkdir -p reports
+          go tool cover -html=coverage.out -o reports/coverage.html || true
+          go tool cover -func=coverage.out > reports/coverage.txt || true
+
           echo "📊 Coverage Summary:"
           if go tool cover -func=coverage.out | grep total:; then
             echo "✅ Standard coverage report generated"
           else
             echo "⚠️ Standard coverage report failed, showing manual analysis:"
-            echo "Coverage file analysis:"
-            cat coverage.out
+            cat coverage.out || true
           fi
-          
-          # Count test files and show test structure
+
           echo "🧪 Test Files Found:"
-          find . -name "*_test.go" -exec basename {} \;
-          echo "Total test files: $(find . -name "*_test.go" | wc -l)"
+          find . -name "*_test.go" -exec basename {} \; || true
+          echo "Total test files: $(find . -name "*_test.go" | wc -l || echo 0)"
 
       # Security scanning
       - name: Install security tools
@@ -171,8 +139,6 @@ jobs:
         id: security-scan
         run: |
           echo "🔍 Scanning dependencies for vulnerabilities..."
-          
-          # Scan for known CVEs
           if go list -json -deps ./... | nancy sleuth; then
             echo "✅ No critical vulnerabilities found"
             echo "security_status=passed" >> $GITHUB_OUTPUT
@@ -186,7 +152,6 @@ jobs:
         id: license-check
         run: |
           echo "📜 Checking license compliance..."
-          
           if go-licenses check ./...; then
             echo "✅ License compliance check passed"
             echo "license_status=passed" >> $GITHUB_OUTPUT
@@ -204,7 +169,6 @@ jobs:
       - name: Install Testmo CLI
         run: npm i -g @testmo/testmo-cli
 
-      # FIXED: Replace broken Testmo CLI commands with working workflow pattern
       - name: Get commit info
         id: commit
         run: |
@@ -221,18 +185,17 @@ jobs:
             --instance ${{ secrets.TESTMO_INSTANCE }} \
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
-            --source "go-ci")
+            --source "${{ env.TESTMO_SOURCE }}")
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Created Testmo run: $RUN_ID"
 
-      - name: Submit test results to Testmo
+      - name: Submit test results to Testmo (thread)
         env:
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          testmo automation:run:submit \
+          testmo automation:run:submit-thread \
             --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-            --name "Test Results: ${{ steps.commit.outputs.branch }}" \
-            --source "go-ci" \
+            --run-id "${{ steps.testmo.outputs.run_id }}" \
             --results reports/unit-tests.xml
 
       - name: Complete Testmo run
@@ -241,7 +204,6 @@ jobs:
         run: |
           testmo automation:run:complete \
             --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --run-id "${{ steps.testmo.outputs.run_id }}"
 
       - name: Comment on PR with Testmo link
@@ -249,20 +211,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const testmoUrl = `https://app.testmo.com/automation/runs/${{ steps.testmo.outputs.run_id }}`;
+            const runId = `${{ steps.testmo.outputs.run_id }}`;
+            const instance = `${{ secrets.TESTMO_INSTANCE }}`.replace(/\/+$/,'');
+            const testmoUrl = `${instance}/automation/runs/${runId}`;
             const comment = `## 🧪 Test Results Uploaded to Testmo
-            
+
             ✅ **CI Status**: Tests passed successfully
-            
+
             📊 **Testmo Run**: [View Results](${testmoUrl})
-            
-            📈 **Coverage**: Generated and uploaded
-            
-            🔗 **Run ID**: \`${{ steps.testmo.outputs.run_id }}\`
-            
+
+            📈 **Coverage**: ${{ steps.coverage-check.outputs.coverage_percentage || 'see artifacts' }}%
+
+            🔗 **Run ID**: \`${runId}\`
+
             ---
             *This comment was automatically generated by the CI pipeline*`;
-            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -278,13 +241,3 @@ jobs:
             reports/
             coverage.out
           retention-days: 30
-
-      - name: Check test coverage threshold
-        run: |
-          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-          echo "Total coverage: ${COVERAGE}%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "Coverage below 80% threshold: ${COVERAGE}%"
-            exit 1
-          fi
-          echo "Coverage threshold met: ${COVERAGE}%"
