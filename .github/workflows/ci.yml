@@ -231,6 +231,7 @@ jobs:
             --instance ${{ secrets.TESTMO_INSTANCE }} \
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --run-id "${{ steps.testmo.outputs.run_id }}" \
+            --name "Test Results: ${{ steps.commit.outputs.branch }}" \
             --results reports/unit-tests.xml \
             --coverage reports/coverage.txt
 
