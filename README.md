@@ -9,7 +9,7 @@ A Go service with integrated CI/CD automation, Testmo test result reporting, and
 - **CI/CD pipeline** via GitHub Actions
 - **Testmo integration** for test result management
 - **Linear PR linking** with automated issue tracking
-- **Coverage thresholds** (80% minimum required)
+- **Coverage thresholds** (80% minimum required)..
 
 ## 🏗️ Architecture
 
@@ -248,6 +248,22 @@ Monitor CI status via:
 2. **Testmo integration fails**: Check API tokens and configuration
 3. **Linear linking issues**: Verify issue keys in PR titles/descriptions
 4. **Branch protection**: Ensure required checks are configured
+
+### Testmo CLI Issues
+
+If you encounter Testmo CLI errors like "unknown command 'run'", use the debug scripts:
+
+**Linux/Mac:**
+```bash
+make testmo-debug
+```
+
+**Windows:**
+```bash
+make testmo-debug-win
+```
+
+For detailed troubleshooting, see [TESTMO-FIX.md](TESTMO-FIX.md).
 
 ### Debug Commands
 

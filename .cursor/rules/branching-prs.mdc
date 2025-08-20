@@ -1,0 +1,20 @@
+---
+description: Branching & PR rules for this repo
+globs:
+alwaysApply: true
+---
+
+# Cursor Rule — Branching & PRs
+
+**Goal:** Always branch from `features`, use consistent names, and open PRs against `features` with Linear context.
+
+## Branching
+- **Base branch:** `features` (never `main`).
+- **Branch name format:** `feature/<ISSUEKEY>-<slug>` (e.g., `feature/SMA-10-add-testmo`)
+- **ISSUEKEYs allowed:** `SMA-\d+` or `ENG-\d+`
+- **Slug:** lowercase, `-` separated, letters/numbers only.
+
+## When creating a branch from an issue
+1. Include the Linear issue key in the branch name.
+2. Ensure base is `features`.
+3. Commit messages start with the key, e.g., `SMA-10: integrate ...`

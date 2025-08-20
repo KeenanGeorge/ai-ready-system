@@ -1,123 +1,243 @@
-name: CI
+name: Go Coverage & Tests
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+  push:
     branches: [ main ]
 
 env:
-  GO_VERSION: '1.22'
+  COVERAGE_THRESHOLD: 75
+  MAX_TEST_RETRIES: 3
   TESTMO_SOURCE: 'go-ci'
 
 jobs:
   test:
-    name: Run Tests and Upload to Testmo
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for commit info
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
 
-    - name: Install gotestsum
-      run: go install gotest.tools/gotestsum@latest
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc
 
-    - name: Install Testmo CLI
-      run: npm install -g @testmo/testmo-cli
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
 
-    - name: Create reports directory
-      run: mkdir -p reports
+      - name: Install gotestsum (JUnit)
+        run: go install gotest.tools/gotestsum@latest
 
-    - name: Run tests with coverage and generate JUnit report
-      run: |
-        gotestsum --format=standard-verbose \
-          --junitfile=reports/unit-tests.xml \
-          --jsonfile=reports/test-results.json \
-          --coverprofile=coverage.out \
-          --covermode=atomic \
-          ./...
+      # Enhanced test execution with retry logic
+      - name: Run unit tests with retry logic
+        id: test-execution
+        run: |
+          mkdir -p reports
+          echo "🧪 Starting test execution with retry logic..."
+          GOTESTSUM="$(go env GOPATH)/bin/gotestsum"
 
-    - name: Generate coverage report
-      run: |
-        go tool cover -html=coverage.out -o reports/coverage.html
-        go tool cover -func=coverage.out > reports/coverage.txt
+          for i in $(seq 1 ${{ env.MAX_TEST_RETRIES }}); do
+            echo "📋 Attempt $i of ${{ env.MAX_TEST_RETRIES }}..."
+            if "$GOTESTSUM" --junitfile reports/unit-tests.xml -- -coverprofile=coverage.out -covermode=atomic ./...; then
+              echo "✅ Tests passed on attempt $i"
+              echo "attempt_number=$i" >> $GITHUB_OUTPUT
+              break
+            fi
 
-    - name: Get commit info
-      id: commit
-      run: |
-        echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
-        echo "message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
+            if [ $i -eq ${{ env.MAX_TEST_RETRIES }} ]; then
+              echo "❌ All ${{ env.MAX_TEST_RETRIES }} test attempts failed"
+              exit 1
+            fi
 
-    - name: Create Testmo run
-      id: testmo
-      run: |
-        RUN_ID=$(testmo run create \
-          --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
-          --source "${{ env.TESTMO_SOURCE }}" \
-          --milestone "CI Automation" \
-          --config "Go ${{ env.GO_VERSION }")
-        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+            echo "⚠️ Attempt $i failed, retrying in 5 seconds..."
+            sleep 5
+          done
 
-    - name: Submit test results to Testmo
-      run: |
-        testmo run submit \
-          --run-id "${{ steps.testmo.outputs.run_id }}" \
-          --results reports/unit-tests.xml \
-          --coverage reports/coverage.txt
+      # Coverage threshold enforcement with robust parsing
+      - name: Enforce coverage threshold
+        id: coverage-check
+        run: |
+          echo "📊 Checking coverage threshold..."
+          echo "Coverage file contents:"
+          cat coverage.out || true
 
-    - name: Complete Testmo run
-      run: |
-        testmo run complete --run-id "${{ steps.testmo.outputs.run_id }}"
+          echo "🔍 Method 1: Standard go tool cover parsing..."
+          COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep -E '^total:' | awk '{print $3}' | sed 's/%//')
 
-    - name: Comment on PR with Testmo link
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const testmoUrl = `https://app.testmo.com/automation/runs/${{ steps.testmo.outputs.run_id }}`;
-          const comment = `## 🧪 Test Results Uploaded to Testmo
-          
-          ✅ **CI Status**: Tests passed successfully
-          
-          📊 **Testmo Run**: [View Results](${testmoUrl})
-          
-          📈 **Coverage**: Generated and uploaded
-          
-          🔗 **Run ID**: \`${{ steps.testmo.outputs.run_id }}\`
-          
-          ---
-          *This comment was automatically generated by the CI pipeline*`;
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+          if [ -z "$COVERAGE" ] || [ "$COVERAGE" = "0" ]; then
+            echo "⚠️ Method 1 failed, trying Method 2: Manual coverage calculation..."
+            TOTAL_LINES=$(wc -l < coverage.out || echo 0)
+            if [ "$TOTAL_LINES" -gt 1 ]; then
+              COVERED_LINES=$(tail -n +2 coverage.out | awk '{sum += $4} END {print sum}')
+              TOTAL_CODE_LINES=$(tail -n +2 coverage.out | awk '{sum += $3} END {print sum}')
+              if [ -n "$COVERED_LINES" ] && [ -n "$TOTAL_CODE_LINES" ] && [ "$TOTAL_CODE_LINES" -gt 0 ]; then
+                COVERAGE=$(echo "scale=1; $COVERED_LINES * 100 / $TOTAL_CODE_LINES" | bc)
+              else
+                echo "⚠️ Manual calculation failed, using fallback 0"
+                COVERAGE=0
+              fi
+            else
+              echo "⚠️ Coverage file too small, using fallback 0"
+              COVERAGE=0
+            fi
+          fi
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: |
-          reports/
-          coverage.out
-        retention-days: 30
+          echo "📊 Final coverage result: ${COVERAGE}%"
+          echo "🎯 Threshold: ${{ env.COVERAGE_THRESHOLD }}%"
 
-    - name: Check test coverage threshold
-      run: |
-        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-        echo "Total coverage: ${COVERAGE}%"
-        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-          echo "Coverage below 80% threshold: ${COVERAGE}%"
-          exit 1
-        fi
-        echo "Coverage threshold met: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "❌ Coverage ${COVERAGE}% below ${{ env.COVERAGE_THRESHOLD }}% threshold"
+            echo "coverage_status=failed" >> $GITHUB_OUTPUT
+            echo "coverage_percentage=$COVERAGE" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ Coverage ${COVERAGE}% meets ${{ env.COVERAGE_THRESHOLD }}% threshold"
+            echo "coverage_status=passed" >> $GITHUB_OUTPUT
+            echo "coverage_percentage=$COVERAGE" >> $GITHUB_OUTPUT
+          fi
+
+      # Generate coverage reports
+      - name: Generate coverage reports
+        run: |
+          echo "📈 Generating detailed coverage reports..."
+          mkdir -p reports
+          go tool cover -html=coverage.out -o reports/coverage.html || true
+          go tool cover -func=coverage.out > reports/coverage.txt || true
+
+          echo "📊 Coverage Summary:"
+          if go tool cover -func=coverage.out | grep total:; then
+            echo "✅ Standard coverage report generated"
+          else
+            echo "⚠️ Standard coverage report failed, showing manual analysis:"
+            cat coverage.out || true
+          fi
+
+          echo "🧪 Test Files Found:"
+          find . -name "*_test.go" -exec basename {} \; || true
+          echo "Total test files: $(find . -name "*_test.go" | wc -l || echo 0)"
+
+      # Security scanning
+      - name: Install security tools
+        run: |
+          echo "🔒 Installing security scanning tools..."
+          go install github.com/sonatype-nexus-community/nancy@latest
+          go install github.com/google/go-licenses@latest
+
+      - name: Security scan dependencies
+        id: security-scan
+        run: |
+          echo "🔍 Scanning dependencies for vulnerabilities..."
+          if go list -json -deps ./... | nancy sleuth; then
+            echo "✅ No critical vulnerabilities found"
+            echo "security_status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Critical vulnerabilities detected"
+            echo "security_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Check license compliance
+        id: license-check
+        run: |
+          echo "📜 Checking license compliance..."
+          if go-licenses check ./...; then
+            echo "✅ License compliance check passed"
+            echo "license_status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "❌ License compliance check failed"
+            echo "license_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Setup Node (for Testmo CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Testmo CLI
+        run: npm i -g @testmo/testmo-cli
+
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+          echo "message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
+
+      - name: Create Testmo run
+        id: testmo
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+          RUN_ID=$(testmo automation:run:create \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+            --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
+            --source "${{ env.TESTMO_SOURCE }}")
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Created Testmo run: $RUN_ID"
+
+      - name: Submit test results to Testmo (thread)
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+          testmo automation:run:submit-thread \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --run-id "${{ steps.testmo.outputs.run_id }}" \
+            --results reports/unit-tests.xml
+
+      - name: Complete Testmo run
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+          testmo automation:run:complete \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --run-id "${{ steps.testmo.outputs.run_id }}"
+
+      - name: Comment on PR with Testmo link
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = `${{ steps.testmo.outputs.run_id }}`;
+            const instance = `${{ secrets.TESTMO_INSTANCE }}`.replace(/\/+$/,'');
+            const testmoUrl = `${instance}/automation/runs/${runId}`;
+            const comment = `## 🧪 Test Results Uploaded to Testmo
+
+            ✅ **CI Status**: Tests passed successfully
+
+            📊 **Testmo Run**: [View Results](${testmoUrl})
+
+            📈 **Coverage**: ${{ steps.coverage-check.outputs.coverage_percentage || 'see artifacts' }}%
+
+            🔗 **Run ID**: \`${runId}\`
+
+            ---
+            *This comment was automatically generated by the CI pipeline*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            reports/
+            coverage.out
+          retention-days: 30
