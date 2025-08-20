@@ -7,6 +7,7 @@ on:
 env:
   COVERAGE_THRESHOLD: 75  # Temporarily set to 60% to match current coverage
   MAX_TEST_RETRIES: 3
+  TESTMO_SOURCE: 'go-ci'
 
 jobs:
   test:
@@ -213,24 +214,35 @@ jobs:
 
       - name: Create Testmo run
         id: testmo
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          RUN_ID=$(testmo run create \
+          RUN_ID=$(testmo automation:run:create \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
-            --source "${{ env.TESTMO_SOURCE }}" \
-            --milestone "CI Automation" \
-            --config "Go ${{ env.GO_VERSION }}")
+            --source "go-ci")
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       - name: Submit test results to Testmo
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          testmo run submit \
-            --run-id "${{ steps.testmo.outputs.run_id }}" \
-            --results reports/unit-tests.xml \
-            --coverage reports/coverage.txt
+          testmo automation:run:submit \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+            --name "Test Results: ${{ steps.commit.outputs.branch }}" \
+            --source "go-ci" \
+            --results reports/unit-tests.xml
 
       - name: Complete Testmo run
+        env:
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          testmo run complete --run-id "${{ steps.testmo.outputs.run_id }}"
+          testmo automation:run:complete \
+            --instance ${{ secrets.TESTMO_INSTANCE }} \
+            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+            --run-id "${{ steps.testmo.outputs.run_id }}"
 
       - name: Comment on PR with Testmo link
         if: github.event_name == 'pull_request'
