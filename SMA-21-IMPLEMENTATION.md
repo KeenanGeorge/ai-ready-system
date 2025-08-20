@@ -49,6 +49,7 @@
   run: |
     RUN_ID=$(testmo automation:run:create \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
       --source "go-ci")
     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
@@ -59,6 +60,7 @@
   run: |
     testmo automation:run:submit \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "Test Results: ${{ steps.commit.outputs.branch }}" \
       --source "go-ci" \
       --results reports/unit-tests.xml
@@ -69,6 +71,7 @@
   run: |
     testmo automation:run:complete \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
+      --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}"
 ```
 
@@ -77,11 +80,10 @@
 - ✅ **Removed `--milestone "CI Automation"`** parameter that was causing "milestone not found" errors
 - ✅ **Added `--name` parameter** to submit command to fix "required option '--name <name>' not specified" error
 - ✅ **Added `--source` parameter** to submit command to fix "required option '--source <source>' not specified" error
-- ✅ **Removed `--run-id` parameter** from submit command as it's not supported there
 - ✅ **Restored `--run-id` parameter** to complete command as it's required there
 - ✅ **Removed `--coverage` parameter** from submit command as it's not supported
-- ✅ **Removed `--project-id` parameter** from ALL commands as it's not supported
-- ✅ **Simplified command structure** to use only supported parameters
+- ✅ **Restored `--project-id` parameter** to ALL commands as it's actually required
+- ✅ **Simplified command structure** to use only required parameters
 - ✅ **Maintained essential metadata** (name, source) for proper Testmo integration
 
 ## What Was Preserved (User's Previous Changes)
