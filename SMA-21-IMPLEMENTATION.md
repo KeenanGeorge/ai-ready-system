@@ -63,6 +63,7 @@
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}" \
       --name "Test Results: ${{ steps.commit.outputs.branch }}" \
+      --source "go-ci" \
       --results reports/unit-tests.xml \
       --coverage reports/coverage.txt
 
@@ -80,6 +81,7 @@
 - ✅ **Removed `--config "Go 1.22"`** parameter that was causing "configuration not found" errors
 - ✅ **Removed `--milestone "CI Automation"`** parameter that was causing "milestone not found" errors
 - ✅ **Added `--name` parameter** to submit command to fix "required option '--name <name>' not specified" error
+- ✅ **Added `--source` parameter** to submit command to fix "required option '--source <source>' not specified" error
 - ✅ **Simplified command structure** to use only required parameters
 - ✅ **Maintained essential metadata** (name, source) for proper Testmo integration
 
