@@ -227,11 +227,8 @@ jobs:
         env:
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          testmo automation:run:submit \
-            --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
+          testmo run submit \
             --run-id "${{ steps.testmo.outputs.run_id }}" \
-            --name "Test Results: ${{ steps.commit.outputs.branch }}" \
             --results reports/unit-tests.xml \
             --coverage reports/coverage.txt
 
@@ -239,10 +236,7 @@ jobs:
         env:
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          testmo automation:run:complete \
-            --instance ${{ secrets.TESTMO_INSTANCE }} \
-            --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
-            --run-id "${{ steps.testmo.outputs.run_id }}"
+          testmo run complete --run-id "${{ steps.testmo.outputs.run_id }}"
 
       # Enhanced PR comments with quality metrics
       - name: Comment on PR with quality metrics
