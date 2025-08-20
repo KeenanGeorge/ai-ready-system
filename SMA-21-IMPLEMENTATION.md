@@ -63,8 +63,7 @@
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "Test Results: ${{ steps.commit.outputs.branch }}" \
       --source "go-ci" \
-      --results reports/unit-tests.xml \
-      --coverage reports/coverage.txt
+      --results reports/unit-tests.xml
 
 - name: Complete Testmo run
   env:
@@ -81,6 +80,7 @@
 - ✅ **Added `--name` parameter** to submit command to fix "required option '--name <name>' not specified" error
 - ✅ **Added `--source` parameter** to submit command to fix "required option '--source <source>' not specified" error
 - ✅ **Removed `--run-id` parameter** from submit and complete commands as it's not supported
+- ✅ **Removed `--coverage` parameter** from submit command as it's not supported
 - ✅ **Simplified command structure** to use only supported parameters
 - ✅ **Maintained essential metadata** (name, source) for proper Testmo integration
 

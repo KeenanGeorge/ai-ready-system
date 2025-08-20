@@ -232,8 +232,7 @@ jobs:
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --name "Test Results: ${{ steps.commit.outputs.branch }}" \
             --source "go-ci" \
-            --results reports/unit-tests.xml \
-            --coverage reports/coverage.txt
+            --results reports/unit-tests.xml
 
       - name: Complete Testmo run
         env:
