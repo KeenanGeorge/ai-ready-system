@@ -221,8 +221,7 @@ jobs:
             --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
             --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
             --source "go-ci" \
-            --milestone "CI Automation" \
-            --config "Go 1.22")
+            --milestone "CI Automation")
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       - name: Submit test results to Testmo

@@ -52,8 +52,7 @@
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
       --source "go-ci" \
-      --milestone "CI Automation" \
-      --config "Go 1.22")
+      --milestone "CI Automation")
     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
 - name: Submit test results to Testmo
@@ -76,6 +75,11 @@
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}"
 ```
+
+### **Additional Fixes Applied:**
+- ✅ **Removed `--config "Go 1.22"`** parameter that was causing "configuration not found" errors
+- ✅ **Simplified command structure** to use only required parameters
+- ✅ **Maintained essential metadata** (name, source, milestone) for proper Testmo integration
 
 ## What Was Preserved (User's Previous Changes)
 
