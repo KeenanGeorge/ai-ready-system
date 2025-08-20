@@ -147,7 +147,7 @@ func TestStartServer(t *testing.T) {
 		// Act
 		// Test with an invalid port to trigger an error
 		err := startServer(":invalid")
-		
+
 		// Assert
 		if err == nil {
 			t.Error("expected error for invalid port, got nil")
@@ -191,7 +191,7 @@ func TestMainFunctionBehavior(t *testing.T) {
 		// This test verifies that main function exists and can be referenced
 		// We can't actually call main() as it blocks, but we can verify it exists
 		// by checking that the package compiles and main is accessible
-		
+
 		// Assert
 		t.Log("Main function exists and is accessible")
 	})
@@ -203,7 +203,7 @@ func TestMainFunctionBehavior(t *testing.T) {
 		// by testing the startServer function with an invalid port
 		// This covers the same logic path that main would take
 		err := startServer(":invalid")
-		
+
 		// Assert
 		if err == nil {
 			t.Error("expected error for invalid port, got nil")
