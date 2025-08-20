@@ -47,7 +47,7 @@
   env:
     TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
-    RUN_ID=$(testmo run create \
+    RUN_ID=$(testmo automation:run:create \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --name "CI: ${{ steps.commit.outputs.branch }} - ${{ steps.commit.outputs.sha }}" \
@@ -60,7 +60,7 @@
   env:
     TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
-    testmo run submit \
+    testmo automation:run:submit \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}" \
@@ -71,7 +71,7 @@
   env:
     TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
   run: |
-    testmo run complete \
+    testmo automation:run:complete \
       --instance ${{ secrets.TESTMO_INSTANCE }} \
       --project-id ${{ secrets.TESTMO_PROJECT_ID }} \
       --run-id "${{ steps.testmo.outputs.run_id }}"
