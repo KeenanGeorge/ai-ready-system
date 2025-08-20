@@ -9,7 +9,7 @@ A Go service with integrated CI/CD automation, Testmo test result reporting, and
 - **CI/CD pipeline** via GitHub Actions
 - **Testmo integration** for test result management
 - **Linear PR linking** with automated issue tracking
-- **Coverage thresholds** (80% minimum required).
+- **Coverage thresholds** (80% minimum required)..
 
 ## 🏗️ Architecture
 
