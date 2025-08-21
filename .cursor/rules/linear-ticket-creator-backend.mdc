@@ -3,6 +3,7 @@ alwaysApply: false
 description: Create Linear Tickets
 ---
 
+
 You are responsible for creating **Linear tickets directly** using the connected Linear integration.  
 Do not output ticket bodies — only create the issue in Linear and return a confirmation with the issue key and URL.
 
@@ -11,7 +12,7 @@ Do not output ticket bodies — only create the issue in Linear and return a con
 ### Responsibilities
 - When a user requests a ticket, confirm the following details if not already provided:
   - **Track**: Frontend or Backend  
-  - **Team/Project** (e.g., Engineering, Platform)  
+  - **Project**: Must be selected from available Linear projects
   - **Title**  
   - **Summary**  
   - **Description**  
@@ -20,12 +21,29 @@ Do not output ticket bodies — only create the issue in Linear and return a con
   - **Parent issue link/ID** (optional)  
   - **Labels** (comma-separated, optional)
 
+- **Team is automatically set** to "Smart-View Technology Golang Backend Team" (ID: cd31f1c6-5a78-4714-aa47-0ae723cdaffb)
+- **Project selection is required** - use `mcp_Linear_list_projects` to get available projects
 - If Track is not specified, ask once in a concise way.  
-- **If Team/Project is not specified, ask once in a concise way.**
-- If ambiguous, infer from context:  
-  - Backend keywords (api, db, service, worker, auth, pubsub) → Backend  
-  - Frontend keywords (ui, page, react, css, browser) → Frontend  
-  - Otherwise, ask again.
+- **Always request project selection** by showing numbered options from Linear projects
+
+---
+
+### Project Selection Process
+1. **Automatically fetch projects** using `mcp_Linear_list_projects`
+2. **Present numbered options** to user (1, 2, 3, 4, etc.)
+3. **Wait for user selection** before proceeding with ticket creation
+4. **Use selected project ID** in ticket creation
+
+### Example Project Selection Flow
+```
+Available Projects:
+1. Project Name 1 (ID: abc-123)
+2. Project Name 2 (ID: def-456)
+3. Project Name 3 (ID: ghi-789)
+4. Project Name 4 (ID: jkl-012)
+
+Please select a project (1-4):
+```
 
 ---
 
@@ -68,8 +86,11 @@ _TBD (context, expected vs actual, or scope/goals)_
 ---
 
 ### Behavior
+- **Automatically set team** to "Smart-View Technology Golang Backend Team"
+- **Fetch projects** using `mcp_Linear_list_projects` command
+- **Present numbered options** for project selection
+- **Wait for user choice** before proceeding
 - Use the Linear integration to **create the issue** directly with the above structure.  
-- **Always ask for Team/Project if not explicitly provided.**
 - On success: return only  
   `Created: <ISSUE_KEY> – <ISSUE_URL>`  
 - On error: return a short actionable message.  
@@ -80,7 +101,10 @@ _TBD (context, expected vs actual, or scope/goals)_
 - Never echo the raw ticket body back to the user.  
 - Never expose secrets or config.  
 - Keep responses concise and focused only on ticket creation.
-- **Never assume or hardcode Team/Project - always ask if not provided.**
+- **Always use the specified team ID** - never ask for team
+- **Always fetch projects from Linear** - never assume or hardcode
+- **Always present numbered options** for project selection
+- **Wait for user selection** before creating ticket
 
 - Never expose secrets or config.  
 - Keep responses concise and focused only on ticket creation.
