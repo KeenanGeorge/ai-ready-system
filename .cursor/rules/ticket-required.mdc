@@ -1,0 +1,134 @@
+# 🚨 **TICKET REQUIRED ENFORCEMENT RULE**
+
+**Goal:** NO coding implementation can proceed without a valid Linear ticket number.
+
+## 🔒 **MANDATORY REQUIREMENT**
+**EVERY coding task, feature request, bug fix, or code change MUST have a Linear ticket before implementation begins.**
+
+## 📋 **Enforcement Process**
+
+### **Step 1: Ticket Validation (REQUIRED)**
+When ANY coding request is made:
+1. **STOP** - Do not proceed with implementation
+2. **CHECK** - Does the request include a Linear ticket number?
+3. **VALIDATE** - Is the ticket number in correct format? (`SMA-\d+` or `ENG-\d+`)
+4. **VERIFY** - Does the ticket exist in Linear?
+
+### **Step 2: Ticket Requirements**
+**Valid ticket formats:**
+- `SMA-27` ✅
+- `ENG-123` ✅
+- `SMA-1` ✅
+- `feature request` ❌
+- `bug fix` ❌
+- `add login` ❌
+
+### **Step 3: Implementation Blocking**
+**If NO ticket provided:**
+```
+🚨 IMPLEMENTATION BLOCKED - TICKET REQUIRED
+
+Before I can implement this coding task, you MUST provide:
+1. A Linear ticket number (e.g., SMA-27)
+2. OR create a new ticket using @linear-ticket-creator-backend.mdc
+
+Examples of valid tickets:
+- SMA-27: Add user authentication
+- ENG-123: Fix login bug
+- SMA-15: Implement new API endpoint
+
+Please provide a ticket number or create one first.
+```
+
+**If ticket provided but invalid:**
+```
+🚨 INVALID TICKET FORMAT
+
+The ticket format must be:
+- SMA-XX (where XX is a number)
+- ENG-XX (where XX is a number)
+
+Your ticket: [invalid format]
+Please provide a valid ticket number.
+```
+
+## 🎯 **What Gets Blocked**
+**ALL coding requests are blocked without tickets:**
+- ❌ "Add a new API endpoint"
+- ❌ "Fix the login bug"
+- ❌ "Create a new page"
+- ❌ "Refactor the database code"
+- ❌ "Add unit tests"
+- ❌ "Update the UI"
+
+## ✅ **What Gets Allowed**
+**Only requests WITH valid tickets:**
+- ✅ "Implement SMA-27: Add user authentication API"
+- ✅ "Fix ENG-123: Login validation bug"
+- ✅ "Create SMA-15: User management page"
+
+## 🔄 **Workflow Integration**
+
+### **With @branching-prs.mdc:**
+1. **Ticket required** (this rule)
+2. **Branch created** (branching rule)
+3. **Implementation proceeds**
+
+### **With @linear-ticket-creator-backend.mdc:**
+If no ticket exists:
+1. **Offer to create ticket** using the rule
+2. **Wait for ticket creation**
+3. **Then proceed with implementation**
+
+## 📝 **Response Templates**
+
+### **No Ticket Provided:**
+```
+🚨 TICKET REQUIRED BEFORE IMPLEMENTATION
+
+I cannot proceed with this coding task without a Linear ticket number.
+
+**Required:**
+- Linear ticket number (SMA-XX or ENG-XX)
+
+**Options:**
+1. Provide existing ticket number
+2. Create new ticket using @linear-ticket-creator-backend.mdc
+
+**Example valid requests:**
+- "Implement SMA-27: Add user authentication"
+- "Fix ENG-123: Login validation issue"
+- "Create SMA-15: User management page"
+
+Please provide a ticket number or create one first.
+```
+
+### **Invalid Ticket Format:**
+```
+🚨 INVALID TICKET FORMAT
+
+Ticket must be in format: SMA-XX or ENG-XX
+
+**Your request:** [invalid format]
+**Valid examples:**
+- SMA-27
+- ENG-123
+- SMA-1
+
+Please provide a valid ticket number.
+```
+
+## ⚠️ **Enforcement Rules**
+- **NEVER** start coding without a ticket
+- **NEVER** accept generic feature requests
+- **ALWAYS** validate ticket format
+- **ALWAYS** verify ticket exists
+- **ALWAYS** block implementation until ticket provided
+- **ALWAYS** offer ticket creation if none exists
+
+## 🎯 **Success Criteria**
+Implementation can ONLY proceed when:
+- [ ] Valid ticket number provided
+- [ ] Ticket format is correct (SMA-XX or ENG-XX)
+- [ ] Ticket exists in Linear (verified)
+- [ ] User explicitly confirms ticket number
