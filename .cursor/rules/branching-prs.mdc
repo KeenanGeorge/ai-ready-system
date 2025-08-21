@@ -1,7 +1,11 @@
 
+
 # Cursor Rule — Branching & PRs
 
 **Goal:** Always branch from `features`, use consistent names, and open PRs against `features` with Linear context.
+
+## 🚨 **MANDATORY ENFORCEMENT**
+This rule **MUST** be followed for ALL coding requests, branch creation, and PR operations.
 
 ## Branching
 - **Base branch:** `features` (never `main`).
@@ -13,6 +17,30 @@
 1. Include the Linear issue key in the branch name.
 2. Ensure base is `features`.
 3. Commit messages start with the key, e.g., `SMA-10: integrate ...`
+
+## 🔒 **Enforcement Rules**
+- **NEVER** create branches from `main`
+- **ALWAYS** use `features` as base branch
+- **ALWAYS** include Linear issue key in branch name
+- **ALWAYS** follow naming convention exactly
+- **ALWAYS** start commit messages with issue key
+
+## 📋 **Required Actions for Coding Requests**
+When any coding request is made:
+1. **Verify Linear issue exists** and get issue key
+2. **Create branch** using proper naming: `feature/<ISSUEKEY>-<slug>`
+3. **Set base branch** to `features`
+4. **Use issue key** in all commit messages
+5. **Open PR** against `features` branch (never `main`)
+
+## ⚠️ **Validation Checklist**
+Before proceeding with any code changes:
+- [ ] Linear issue identified and verified
+- [ ] Branch name follows convention: `feature/<ISSUEKEY>-<slug>`
+- [ ] Base branch set to `features`
+- [ ] Commit message format: `<ISSUEKEY>: description`
+- [ ] PR target is `features` branch
+
 
 2. Ensure base is `features`.
 3. Commit messages start with the key, e.g., `SMA-10: integrate ...`
