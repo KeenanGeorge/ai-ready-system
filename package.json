@@ -1,0 +1,27 @@
+{
+  "name": "ai-ready-system",
+  "version": "1.0.0",
+  "description": "Smart-View AI Ready System with Go backend and Playwright testing",
+  "main": "main.go",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "install-browsers": "playwright install",
+    "build": "go build -o bin/server main.go",
+    "run": "go run main.go",
+    "dev": "go run main.go"
+  },
+  "keywords": ["go", "playwright", "testing", "login", "backend"],
+  "author": "Smart-View Technology",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

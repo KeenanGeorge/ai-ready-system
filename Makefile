@@ -1,11 +1,11 @@
-.PHONY: help test test-coverage test-verbose coverage clean build run testmo-debug testmo-debug-win ci-test
+.PHONY: help test test-coverage test-verbose coverage clean build run testmo-debug testmo-debug-win ci-test playwright-test playwright-install playwright-report
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  test          - Run tests"
-	@echo "  test-coverage - Run tests with coverage"
-	@echo "  test-verbose  - Run tests with verbose output"
+	@echo "  test          - Run Go tests"
+	@echo "  test-coverage - Run Go tests with coverage"
+	@echo "  test-verbose  - Run Go tests with verbose output"
 	@echo "  coverage      - Generate coverage report"
 	@echo "  clean         - Clean generated files"
 	@echo "  build         - Build the application"
@@ -13,6 +13,9 @@ help:
 	@echo "  testmo-debug  - Debug Testmo CLI integration (Linux/Mac)"
 	@echo "  testmo-debug-win - Debug Testmo CLI integration (Windows)"
 	@echo "  ci-test       - Test CI workflow locally"
+	@echo "  playwright-test - Run Playwright tests"
+	@echo "  playwright-install - Install Playwright browsers"
+	@echo "  playwright-report - Show Playwright test report"
 
 # Run tests
 test:
@@ -60,6 +63,7 @@ run:
 deps:
 	go mod tidy
 	go install gotest.tools/gotestsum@latest
+	npm install
 
 # Check code quality
 lint:
@@ -88,3 +92,16 @@ ci-test: test-verbose
 	@echo "📊 Coverage report generated"
 	@echo "📁 Check reports/ directory for outputs"
 	@echo "🔍 Run 'make testmo-debug' or 'make testmo-debug-win' to debug Testmo integration"
+
+# Playwright test commands
+playwright-install:
+	@echo "🔧 Installing Playwright browsers..."
+	npm run install-browsers
+
+playwright-test:
+	@echo "🧪 Running Playwright tests..."
+	npm run test
+
+playwright-report:
+	@echo "📊 Opening Playwright test report..."
+	npm run test:report

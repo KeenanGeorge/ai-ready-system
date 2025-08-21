@@ -1,16 +1,13 @@
 ---
-description: Branching & PR rules for this repo
-globs:
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Cursor Rule — Branching & PRs
 
 **Goal:** Always branch from `features`, use consistent names, and open PRs against `features` with Linear context.
 
 ## Branching
 - **Base branch:** `features` (never `main`).
-- **Branch name format:** `feature/<ISSUEKEY>-<slug>` (e.g., `feature/SMA-10-add-testmo`)
+- **Branch name format:** `feature/<ISSUEKEY>-<slug>` (e.g., `feature/SMA-10-add-login-page`)
 - **ISSUEKEYs allowed:** `SMA-\d+` or `ENG-\d+`
 - **Slug:** lowercase, `-` separated, letters/numbers only.
 
