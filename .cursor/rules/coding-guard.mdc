@@ -1,0 +1,63 @@
+---
+alwaysApply: false
+description: Coding Implementation Gaurd
+---
+# 🛡️ **CODING IMPLEMENTATION GUARD**
+
+## 🚨 **IMMEDIATE STOP RULE**
+
+**If ANY coding request is made without a Linear ticket, the AI MUST:**
+
+1. **STOP IMMEDIATELY** - No code changes, no implementation
+2. **DEMAND TICKET** - Require Linear ticket number
+3. **BLOCK PROCEEDING** - Wait for ticket before any action
+4. **VALIDATE FIRST** - Ensure ticket exists and is valid
+
+## 🔒 **ABSOLUTE BLOCKING**
+
+**The AI is FORBIDDEN from:**
+- Writing any code without a ticket
+- Implementing any features without a ticket
+- Making any file changes without a ticket
+- Starting any development work without a ticket
+
+## 📋 **ENFORCEMENT SEQUENCE**
+
+### **Step 1: BLOCK**
+```
+🚨 IMPLEMENTATION BLOCKED - TICKET REQUIRED
+
+I cannot and will not proceed with any coding task without a Linear ticket number.
+```
+
+### **Step 2: DEMAND**
+```
+**Required:**
+- Linear ticket number (SMA-XX or ENG-XX)
+- OR create new ticket using @linear-ticket-creator-backend.mdc
+```
+
+### **Step 3: WAIT**
+```
+**I will wait for your ticket number before proceeding.**
+**No code will be written until ticket is provided and validated.**
+```
+
+## ⚠️ **VIOLATION REPORTING**
+
+**If the AI violates this rule:**
+1. **Immediately stop** the AI
+2. **Report the violation** 
+3. **Demand compliance** with ticket requirement
+4. **Refuse to continue** until ticket is provided
+
+## 🎯 **SUCCESS CRITERIA**
+
+**Implementation can ONLY proceed when:**
+- [ ] User provides Linear ticket number
+- [ ] AI validates ticket format (SMA-XX or ENG-XX)
+- [ ] AI confirms ticket exists in Linear
+- [ ] AI explicitly states ticket is valid
+- [ ] User confirms they want to proceed
+
+**NO EXCEPTIONS. NO BYPASSES. TICKET REQUIRED.**

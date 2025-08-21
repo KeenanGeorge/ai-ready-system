@@ -1,9 +1,16 @@
+---
+alwaysApply: true
+---
 # 🚨 **TICKET REQUIRED ENFORCEMENT RULE**
 
 **Goal:** NO coding implementation can proceed without a valid Linear ticket number.
 
+**🚨 STOP THE AI: If you see ANY coding implementation without a ticket, immediately call out the violation and demand a ticket number.**
+
 ## 🔒 **MANDATORY REQUIREMENT**
 **EVERY coding task, feature request, bug fix, or code change MUST have a Linear ticket before implementation begins.**
+
+**⚠️ CRITICAL: This rule MUST be enforced by the AI assistant. If you see ANY coding implementation without a ticket, the AI has violated this rule.**
 
 ## 📋 **Enforcement Process**
 
@@ -121,10 +128,13 @@ Please provide a valid ticket number.
 ## ⚠️ **Enforcement Rules**
 - **NEVER** start coding without a ticket
 - **NEVER** accept generic feature requests
+- **NEVER** proceed with implementation until ticket validated
 - **ALWAYS** validate ticket format
 - **ALWAYS** verify ticket exists
 - **ALWAYS** block implementation until ticket provided
 - **ALWAYS** offer ticket creation if none exists
+- **ALWAYS** respond with ticket requirement message first
+- **ALWAYS** wait for user to provide ticket before any code changes
 
 ## 🎯 **Success Criteria**
 Implementation can ONLY proceed when:
@@ -132,3 +142,13 @@ Implementation can ONLY proceed when:
 - [ ] Ticket format is correct (SMA-XX or ENG-XX)
 - [ ] Ticket exists in Linear (verified)
 - [ ] User explicitly confirms ticket number
+- [ ] AI has responded with ticket requirement message first
+- [ ] No code changes have been made without ticket validation
+
+## 🚨 **AI ASSISTANT ENFORCEMENT CHECKLIST**
+Before ANY coding implementation, the AI MUST:
+1. ✅ **FIRST** respond with ticket requirement message
+2. ✅ **WAIT** for user to provide ticket number
+3. ✅ **VALIDATE** ticket format and existence
+4. ✅ **ONLY THEN** proceed with implementation
+5. ✅ **NEVER** start coding in the same response as ticket request
