@@ -86,6 +86,22 @@ pre-impl: validate-rules
 	@echo "Ticket: $(TICKET)"
 	@echo "Branch: $(BRANCH)"
 
+# Test coverage enhancement tools
+test-coverage-analyze:
+	@echo "🔍 Analyzing test coverage..."
+	@powershell -ExecutionPolicy Bypass -File scripts/enhance-test-coverage.ps1 -Analyze
+
+test-coverage-enhance:
+	@echo "🔧 Generating test enhancement plan..."
+	@powershell -ExecutionPolicy Bypass -File scripts/enhance-test-coverage.ps1 -Generate
+
+test-coverage-report:
+	@echo "📊 Generating comprehensive coverage report..."
+	@powershell -ExecutionPolicy Bypass -File scripts/enhance-test-coverage.ps1 -Report
+
+test-coverage-full: test-coverage-analyze test-coverage-enhance test-coverage-report
+	@echo "✅ Complete test coverage analysis completed"
+
 # Debug Testmo CLI integration (Linux/Mac)
 testmo-debug:
 	@echo "🔍 Debugging Testmo CLI integration..."
