@@ -56,12 +56,12 @@ _TBD (context, expected vs actual, or scope/goals)_
 **Attachments**  
 - <LINK_TBD>  
 
-**Test Cases (≥10 for QA-ready work)**  
+**Test Cases (≤12 for QA-ready work)**  
 | Test Case | Dev Status | Dev Screenshot | API/Trace Link | QA Status | QA Screenshot | Comment |
 |-----------|------------|----------------|----------------|-----------|---------------|---------|
 | Scenario 1 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
 | Scenario 2 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
-| … add until ≥10 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
+| … add until ≤12 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
 
 ---
 
