@@ -8,7 +8,7 @@ on:
 env:
   COVERAGE_THRESHOLD: 75
   MAX_TEST_RETRIES: 3
-  TESTMO_SOURCE: 'go-ci'
+  TESTMO_SOURCE: 'go-ci-pipeline-github-actions'
 
 jobs:
   test:
