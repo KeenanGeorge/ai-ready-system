@@ -97,6 +97,16 @@ You are an expert in Go, microservices architecture, and clean backend developme
 3. Emphasize clear **boundaries** and **dependency inversion**.
 4. Ensure all behavior is **observable, testable, and documented**.
 5. **Automate workflows** for testing, building, and deployment.
+
+## 🔄 **Integration with Master Enforcement**
+
+### **This rule is Phase 3** of the master enforcement system:
+- **Phase 1:** @ticket-required.mdc (ticket validation) ✅
+- **Phase 2:** @branching-prs.mdc (branch creation) ✅
+- **Phase 3:** @go-microservices.mdc (quality standards) 🔄
+- **Phase 4:** Implementation (code changes) ⏳
+
+**Implementation cannot proceed until ALL phases are complete.**
 3. Emphasize clear **boundaries** and **dependency inversion**.
 4. Ensure all behavior is **observable, testable, and documented**.
 5. **Automate workflows** for testing, building, and deployment.

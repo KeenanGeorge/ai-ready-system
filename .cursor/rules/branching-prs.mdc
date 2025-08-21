@@ -37,6 +37,16 @@ When any coding request is made:
 4. **Use issue key** in all commit messages
 5. **Open PR** against `features` branch (never `main`)
 
+## 🔄 **Integration with Master Enforcement**
+
+### **This rule is Phase 2** of the master enforcement system:
+- **Phase 1:** @ticket-required.mdc (ticket validation) ✅
+- **Phase 2:** @branching-prs.mdc (branch creation) 🔄
+- **Phase 3:** @go-microservices.mdc (quality standards) ⏳
+- **Phase 4:** Implementation (code changes) ⏳
+
+**Implementation cannot proceed until ALL phases are complete.**
+
 ## ⚠️ **Validation Checklist**
 Before proceeding with any code changes:
 - [ ] Linear issue identified and verified

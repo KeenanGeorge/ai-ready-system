@@ -74,6 +74,18 @@ fmt:
 	go fmt ./...
 	go vet ./...
 
+# Validate coding rules before implementation
+validate-rules:
+	@echo "🔍 Validating coding rules..."
+	@powershell -ExecutionPolicy Bypass -File scripts/validate-rules.ps1 -TicketNumber "$(TICKET)" -BranchName "$(BRANCH)"
+	@echo "✅ Rule validation complete"
+
+# Pre-implementation check (requires TICKET and BRANCH variables)
+pre-impl: validate-rules
+	@echo "🚀 All rules validated - ready for implementation"
+	@echo "Ticket: $(TICKET)"
+	@echo "Branch: $(BRANCH)"
+
 # Debug Testmo CLI integration (Linux/Mac)
 testmo-debug:
 	@echo "🔍 Debugging Testmo CLI integration..."

@@ -76,16 +76,18 @@ Please provide a valid ticket number.
 
 ## 🔄 **Workflow Integration**
 
-### **With @branching-prs.mdc:**
-1. **Ticket required** (this rule)
-2. **Branch created** (branching rule)
-3. **Implementation proceeds**
+### **With @master-enforcement.mdc:**
+This rule is **Phase 1** of the master enforcement system.
+1. **Ticket required** (this rule) - Phase 1
+2. **Branch created** (@branching-prs.mdc) - Phase 2
+3. **Quality standards** (@go-microservices.mdc) - Phase 3
+4. **Implementation** - Phase 4 (ONLY after all phases complete)
 
 ### **With @linear-ticket-creator-backend.mdc:**
 If no ticket exists:
 1. **Offer to create ticket** using the rule
 2. **Wait for ticket creation**
-3. **Then proceed with implementation**
+3. **Then proceed to Phase 2** (branching)
 
 ## 📝 **Response Templates**
 

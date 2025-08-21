@@ -1,0 +1,358 @@
+---
+alwaysApply: true
+---
+
+# 🎯 **MASTER RULE ENFORCEMENT SYSTEM**
+
+## 🚨 **CRITICAL: This rule OVERRIDES all others**
+
+**Goal:** Ensure ALL coding rules are followed in the correct sequence before ANY implementation begins.
+
+## 🔄 **Rule Execution Sequence (MANDATORY)**
+
+### **Phase 1: Ticket Validation (BLOCKING)**
+1. **@ticket-required.mdc** - MUST validate ticket exists
+2. **@coding-guard.mdc** - MUST confirm ticket is valid
+3. **Result:** Implementation BLOCKED until ticket provided
+
+### **Phase 2: Workflow Setup (BLOCKING)**
+4. **@branching-prs.mdc** - MUST create proper branch from `features`
+5. **Result:** Implementation BLOCKED until branch created
+
+### **Phase 3: Quality Standards (BLOCKING)**
+6. **@go-microservices.mdc** - MUST ensure all patterns followed
+7. **Result:** Implementation BLOCKED until standards met
+
+### **Phase 4: Implementation (ALLOWED)**
+8. **Code changes** - ONLY after all rules satisfied
+
+## 📋 **Enforcement Checklist (MANDATORY)**
+
+**Before ANY code changes, AI MUST complete:**
+
+### **✅ Ticket Validation**
+- [ ] Linear ticket number provided (SMA-XX or ENG-XX format)
+- [ ] Ticket exists in Linear system
+- [ ] Ticket format validated
+- [ ] User confirms ticket number
+
+### **✅ Branch Creation**
+- [ ] Branch created from `features` (never `main`)
+- [ ] Branch name follows convention: `feature/<ISSUEKEY>-<slug>`
+- [ ] Base branch confirmed as `features`
+- [ ] Branch ready for development
+
+### **✅ Quality Standards**
+- [ ] GoDoc comments planned for all public functions
+- [ ] Error handling patterns defined
+- [ ] Context propagation strategy planned
+- [ ] Security practices identified
+- [ ] Testing strategy defined
+
+### **✅ Implementation Approval**
+- [ ] All rules satisfied
+- [ ] User confirms proceed
+- [ ] Branch ready for commits
+- [ ] Quality gates passed
+
+## 🚫 **BLOCKING CONDITIONS**
+
+**Implementation is BLOCKED if ANY of these are missing:**
+- ❌ No Linear ticket number
+- ❌ Invalid ticket format
+- ❌ Ticket doesn't exist in Linear
+- ❌ No branch created from `features`
+- ❌ Branch name doesn't follow convention
+- ❌ Quality standards not planned
+- ❌ User hasn't confirmed proceed
+
+## 📝 **Required Response Format**
+
+### **When Rules Are NOT Satisfied:**
+```
+🚨 IMPLEMENTATION BLOCKED - RULES NOT SATISFIED
+
+**Missing Requirements:**
+- [List specific missing items]
+
+**Required Actions:**
+1. [Action 1]
+2. [Action 2]
+3. [Action 3]
+
+**I will wait for ALL requirements to be satisfied before proceeding.**
+```
+
+### **When Rules ARE Satisfied:**
+```
+✅ ALL RULES SATISFIED - IMPLEMENTATION APPROVED
+
+**Ticket:** [SMA-XX]
+**Branch:** [feature/SMA-XX-description]
+**Quality Standards:** [List confirmed standards]
+**Status:** Ready to implement
+
+**Proceeding with implementation...**
+```
+
+## 🔒 **Enforcement Mechanisms**
+
+### **1. Sequential Validation**
+- Rules MUST be validated in order
+- No skipping allowed
+- Each phase must complete before next
+
+### **2. User Confirmation Required**
+- User MUST confirm each phase completion
+- AI cannot proceed without explicit user approval
+- All confirmations must be documented
+
+### **3. Quality Gates**
+- Each rule creates a quality gate
+- All gates must be "OPEN" before implementation
+- Gates can be "CLOSED" if requirements change
+
+## ⚠️ **Violation Consequences**
+
+### **If AI Violates This Rule:**
+1. **Immediate stop** of all implementation
+2. **Rule violation report** to user
+3. **Restart** from Phase 1
+4. **No exceptions** or bypasses allowed
+
+### **If User Bypasses Rules:**
+1. **AI must refuse** to proceed
+2. **Explain why** rules are mandatory
+3. **Offer help** to satisfy requirements
+4. **Wait** for proper setup
+
+## 🎯 **Success Criteria**
+
+**Implementation can ONLY proceed when:**
+- [ ] ALL rules validated and satisfied
+- [ ] User confirms each phase completion
+- [ ] Quality gates are OPEN
+- [ ] Branch is ready for development
+- [ ] Ticket is valid and confirmed
+- [ ] Standards are planned and approved
+
+## 🔄 **Integration with Existing Rules**
+
+### **@ticket-required.mdc Integration**
+- This rule handles Phase 1
+- Must complete before proceeding
+
+### **@coding-guard.mdc Integration**
+- This rule provides additional blocking
+- Must be satisfied
+
+### **@branching-prs.mdc Integration**
+- This rule handles Phase 2
+- Must complete before proceeding
+
+### **@go-microservices.mdc Integration**
+- This rule handles Phase 3
+- Must complete before proceeding
+
+## 📋 **Daily Workflow**
+
+### **Morning Setup:**
+1. Review all active tickets
+2. Ensure branches exist for each ticket
+3. Validate rule compliance status
+
+### **Before Each Implementation:**
+1. Run complete rule validation
+2. Confirm all phases satisfied
+3. Get user approval to proceed
+
+### **After Implementation:**
+1. Verify rule compliance maintained
+2. Document any rule violations
+3. Plan corrections if needed
+
+## 🚨 **CRITICAL REMINDER**
+
+**This rule is the MASTER rule. It controls ALL other rules.**
+**No implementation can proceed without this rule being satisfied.**
+**No exceptions. No bypasses. No shortcuts.**
+
+**Follow the sequence. Validate each phase. Get user confirmation.**
+**Only then implement.**
+# 🎯 **MASTER RULE ENFORCEMENT SYSTEM**
+
+## 🚨 **CRITICAL: This rule OVERRIDES all others**
+
+**Goal:** Ensure ALL coding rules are followed in the correct sequence before ANY implementation begins.
+
+## 🔄 **Rule Execution Sequence (MANDATORY)**
+
+### **Phase 1: Ticket Validation (BLOCKING)**
+1. **@ticket-required.mdc** - MUST validate ticket exists
+2. **@coding-guard.mdc** - MUST confirm ticket is valid
+3. **Result:** Implementation BLOCKED until ticket provided
+
+### **Phase 2: Workflow Setup (BLOCKING)**
+4. **@branching-prs.mdc** - MUST create proper branch from `features`
+5. **Result:** Implementation BLOCKED until branch created
+
+### **Phase 3: Quality Standards (BLOCKING)**
+6. **@go-microservices.mdc** - MUST ensure all patterns followed
+7. **Result:** Implementation BLOCKED until standards met
+
+### **Phase 4: Implementation (ALLOWED)**
+8. **Code changes** - ONLY after all rules satisfied
+
+## 📋 **Enforcement Checklist (MANDATORY)**
+
+**Before ANY code changes, AI MUST complete:**
+
+### **✅ Ticket Validation**
+- [ ] Linear ticket number provided (SMA-XX or ENG-XX format)
+- [ ] Ticket exists in Linear system
+- [ ] Ticket format validated
+- [ ] User confirms ticket number
+
+### **✅ Branch Creation**
+- [ ] Branch created from `features` (never `main`)
+- [ ] Branch name follows convention: `feature/<ISSUEKEY>-<slug>`
+- [ ] Base branch confirmed as `features`
+- [ ] Branch ready for development
+
+### **✅ Quality Standards**
+- [ ] GoDoc comments planned for all public functions
+- [ ] Error handling patterns defined
+- [ ] Context propagation strategy planned
+- [ ] Security practices identified
+- [ ] Testing strategy defined
+
+### **✅ Implementation Approval**
+- [ ] All rules satisfied
+- [ ] User confirms proceed
+- [ ] Branch ready for commits
+- [ ] Quality gates passed
+
+## 🚫 **BLOCKING CONDITIONS**
+
+**Implementation is BLOCKED if ANY of these are missing:**
+- ❌ No Linear ticket number
+- ❌ Invalid ticket format
+- ❌ Ticket doesn't exist in Linear
+- ❌ No branch created from `features`
+- ❌ Branch name doesn't follow convention
+- ❌ Quality standards not planned
+- ❌ User hasn't confirmed proceed
+
+## 📝 **Required Response Format**
+
+### **When Rules Are NOT Satisfied:**
+```
+🚨 IMPLEMENTATION BLOCKED - RULES NOT SATISFIED
+
+**Missing Requirements:**
+- [List specific missing items]
+
+**Required Actions:**
+1. [Action 1]
+2. [Action 2]
+3. [Action 3]
+
+**I will wait for ALL requirements to be satisfied before proceeding.**
+```
+
+### **When Rules ARE Satisfied:**
+```
+✅ ALL RULES SATISFIED - IMPLEMENTATION APPROVED
+
+**Ticket:** [SMA-XX]
+**Branch:** [feature/SMA-XX-description]
+**Quality Standards:** [List confirmed standards]
+**Status:** Ready to implement
+
+**Proceeding with implementation...**
+```
+
+## 🔒 **Enforcement Mechanisms**
+
+### **1. Sequential Validation**
+- Rules MUST be validated in order
+- No skipping allowed
+- Each phase must complete before next
+
+### **2. User Confirmation Required**
+- User MUST confirm each phase completion
+- AI cannot proceed without explicit user approval
+- All confirmations must be documented
+
+### **3. Quality Gates**
+- Each rule creates a quality gate
+- All gates must be "OPEN" before implementation
+- Gates can be "CLOSED" if requirements change
+
+## ⚠️ **Violation Consequences**
+
+### **If AI Violates This Rule:**
+1. **Immediate stop** of all implementation
+2. **Rule violation report** to user
+3. **Restart** from Phase 1
+4. **No exceptions** or bypasses allowed
+
+### **If User Bypasses Rules:**
+1. **AI must refuse** to proceed
+2. **Explain why** rules are mandatory
+3. **Offer help** to satisfy requirements
+4. **Wait** for proper setup
+
+## 🎯 **Success Criteria**
+
+**Implementation can ONLY proceed when:**
+- [ ] ALL rules validated and satisfied
+- [ ] User confirms each phase completion
+- [ ] Quality gates are OPEN
+- [ ] Branch is ready for development
+- [ ] Ticket is valid and confirmed
+- [ ] Standards are planned and approved
+
+## 🔄 **Integration with Existing Rules**
+
+### **@ticket-required.mdc Integration**
+- This rule handles Phase 1
+- Must complete before proceeding
+
+### **@coding-guard.mdc Integration**
+- This rule provides additional blocking
+- Must be satisfied
+
+### **@branching-prs.mdc Integration**
+- This rule handles Phase 2
+- Must complete before proceeding
+
+### **@go-microservices.mdc Integration**
+- This rule handles Phase 3
+- Must complete before proceeding
+
+## 📋 **Daily Workflow**
+
+### **Morning Setup:**
+1. Review all active tickets
+2. Ensure branches exist for each ticket
+3. Validate rule compliance status
+
+### **Before Each Implementation:**
+1. Run complete rule validation
+2. Confirm all phases satisfied
+3. Get user approval to proceed
+
+### **After Implementation:**
+1. Verify rule compliance maintained
+2. Document any rule violations
+3. Plan corrections if needed
+
+## 🚨 **CRITICAL REMINDER**
+
+**This rule is the MASTER rule. It controls ALL other rules.**
+**No implementation can proceed without this rule being satisfied.**
+**No exceptions. No bypasses. No shortcuts.**
+
+**Follow the sequence. Validate each phase. Get user confirmation.**
+**Only then implement.**
