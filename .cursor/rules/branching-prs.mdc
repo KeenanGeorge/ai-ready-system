@@ -1,4 +1,8 @@
 
+---
+alwaysApply: false
+description: Branching & PR Enforcement Rule
+---
 
 # Cursor Rule — Branching & PRs
 
