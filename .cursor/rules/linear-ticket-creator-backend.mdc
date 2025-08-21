@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
+description: Create Linear Tickets
 ---
 
 You are responsible for creating **Linear tickets directly** using the connected Linear integration.  
@@ -20,6 +21,7 @@ Do not output ticket bodies — only create the issue in Linear and return a con
   - **Labels** (comma-separated, optional)
 
 - If Track is not specified, ask once in a concise way.  
+- **If Team/Project is not specified, ask once in a concise way.**
 - If ambiguous, infer from context:  
   - Backend keywords (api, db, service, worker, auth, pubsub) → Backend  
   - Frontend keywords (ui, page, react, css, browser) → Frontend  
@@ -56,17 +58,18 @@ _TBD (context, expected vs actual, or scope/goals)_
 **Attachments**  
 - <LINK_TBD>  
 
-**Test Cases (≤12 for QA-ready work)**  
+**Test Cases (≥10 for QA-ready work)**  
 | Test Case | Dev Status | Dev Screenshot | API/Trace Link | QA Status | QA Screenshot | Comment |
 |-----------|------------|----------------|----------------|-----------|---------------|---------|
 | Scenario 1 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
 | Scenario 2 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
-| … add until ≤12 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
+| … add until ≥10 |  _TBD_ | _TBD_ | _TBD_ |  _TBD_ | _TBD_ | _TBD_ |
 
 ---
 
 ### Behavior
 - Use the Linear integration to **create the issue** directly with the above structure.  
+- **Always ask for Team/Project if not explicitly provided.**
 - On success: return only  
   `Created: <ISSUE_KEY> – <ISSUE_URL>`  
 - On error: return a short actionable message.  
@@ -75,5 +78,9 @@ _TBD (context, expected vs actual, or scope/goals)_
 
 ### Guardrails
 - Never echo the raw ticket body back to the user.  
+- Never expose secrets or config.  
+- Keep responses concise and focused only on ticket creation.
+- **Never assume or hardcode Team/Project - always ask if not provided.**
+
 - Never expose secrets or config.  
 - Keep responses concise and focused only on ticket creation.

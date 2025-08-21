@@ -1,6 +1,4 @@
----
-alwaysApply: false
----
+
 # Cursor Rule — Branching & PRs
 
 **Goal:** Always branch from `features`, use consistent names, and open PRs against `features` with Linear context.
@@ -13,5 +11,8 @@ alwaysApply: false
 
 ## When creating a branch from an issue
 1. Include the Linear issue key in the branch name.
+2. Ensure base is `features`.
+3. Commit messages start with the key, e.g., `SMA-10: integrate ...`
+
 2. Ensure base is `features`.
 3. Commit messages start with the key, e.g., `SMA-10: integrate ...`
